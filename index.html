@@ -637,10 +637,11 @@ footer p {
         <div id="marketList" class="chips"></div>
         <div class="form-grid">
           <label>Analysis window (ticks, 25 - 1000)<input id="windowSize" type="number" min="25" max="1000" step="25" value="50"></label>
-          <label>Trigger: digit below (%)<input id="threshold" type="number" min="1" max="20" step="0.5" value="8.5"></label>
+          <label>Trigger: digit below (%)<input id="threshold" type="number" min="1" max="20" step="0.1" value="8.5"></label>
           <label>Max trades per market (1 - 4)<input id="maxTrades" type="number" min="1" max="4" step="1" value="2"></label>
           <label>Pause a market after (its ticks)<input id="pauseTicks" type="number" min="0" max="1000" step="10" value="50"></label>
           <label>Lowest digit must be falling vs (ticks ago, 0 = off)<input id="lookback" type="number" min="0" max="100" step="1" value="10"></label>
+          <label>Minimum fall to trade (percentage points)<input id="minDrop" type="number" min="0" max="10" step="0.1" value="0.1"></label>
         </div>
       </section>
 
@@ -673,7 +674,7 @@ footer p {
           <button id="startBtn" class="btn primary" type="button" disabled>Start Bot</button>
           <button id="stopBtn" class="btn warning" type="button" disabled>Stop Bot</button>
         </div>
-        <p class="small">Entry filter: the bot reads the last digit of every selected market over the analysis window. When a digit from 1 to 8 drops below the trigger (default 8.5%), the lowest one becomes the prediction and the bot instantly buys one Differs on it, without waiting for that digit to appear. That lowest digit must also be falling: its percentage now has to be lower than it was the chosen number of ticks ago (set 0 to turn this off). Digits 0 and 9 are never predicted. In-and-out rule: it makes at most 1 to 4 consecutive trades on a market, then pauses that market and hops to another one that qualifies. Differs wins about 90% of the time but pays only a small amount, so one loss costs far more than a win earns. Martingale can rapidly increase risk. Test on a demo account first.</p>
+        <p class="small">Entry filter: the bot reads the last digit of every selected market over the analysis window. When a digit from 1 to 8 drops below the trigger (default 8.5%), the lowest one becomes the prediction and the bot instantly buys one Differs on it, without waiting for that digit to appear. That lowest digit must also be falling: its percentage now has to be lower than it was the chosen number of ticks ago by at least the minimum decrease (default 0.1%, so 8.4% to 8.3%, 8.2% or 7.4% all count). Set the ticks to 0 to turn this off. Digits 0 and 9 are never predicted. In-and-out rule: it makes at most 1 to 4 consecutive trades on a market, then pauses that market and hops to another one that qualifies. Differs wins about 90% of the time but pays only a small amount, so one loss costs far more than a win earns. Martingale can rapidly increase risk. Test on a demo account first.</p>
       </section>
 
       <section class="panel">
@@ -806,25 +807,34 @@ function lookbackN() {
   const v = parseInt($("lookback").value, 10);
   return Math.min(analysisN(), Math.max(0, Number.isFinite(v) ? v : 10));
 }
+/* Smallest fall (in percentage points) that counts as "decreasing". Default 0.1 (e.g. 8.4% -> 8.3%). */
+function minDrop() {
+  const v = parseFloat($("minDrop").value);
+  return Math.min(10, Math.max(0, Number.isFinite(v) ? v : 0.1));
+}
 /* Ticks in the analysis window (the buffer also keeps a few older ticks for the trend check). */
 function winLen(w) { return Math.min(w.digits.length, analysisN()); }
 /*
- * Is the digit's percentage FALLING? Compare how often it appears in the window
- * now with the window as it was `lookback` ticks ago. Falling = fewer now than then,
- * or already at 0% (it cannot fall further).
+ * Is the digit's percentage FALLING? Compare its percentage in the window now with
+ * the window as it was `lookback` ticks ago. Falling = it has dropped by at least the
+ * minimum decrease (default 0.1 percentage points: 8.4% -> 8.3%, 8.2%, 7.4% ...),
+ * or it is already at 0% (it cannot fall further).
  */
 function trendOf(w, d) {
   const L = lookbackN();
   const n = analysisN();
-  if (L === 0) return { decreasing: true, known: true, now: w.counts[d], prev: w.counts[d] };
-  if (w.digits.length < n + L) return { decreasing: false, known: false, now: w.counts[d], prev: w.counts[d] };
+  if (L === 0) return { decreasing: true, known: true, now: w.counts[d], prev: w.counts[d], drop: 0 };
+  if (w.digits.length < n + L) return { decreasing: false, known: false, now: w.counts[d], prev: w.counts[d], drop: 0 };
   const len = w.digits.length;
   let recent = 0, older = 0;
   for (let i = len - L; i < len; i++) if (w.digits[i] === d) recent += 1;
   for (let i = len - n - L; i < len - n; i++) if (w.digits[i] === d) older += 1;
   const now = w.counts[d];
   const prev = now - recent + older;
-  return { decreasing: now < prev || now === 0, known: true, now, prev };
+  const drop = ((prev - now) / n) * 100;                 // percentage points the digit has fallen
+  const need = minDrop();
+  const falling = drop > 1e-9 && drop >= need - 1e-9;
+  return { decreasing: falling || now === 0, known: true, now, prev, drop };
 }
 function addDigit(w, d) {
   w.digits.push(d);
@@ -989,7 +999,9 @@ function renderWatch() {
     if (!r) return;
     const w = watchOf(sym);
     const l = lowestOf(sym);
-    const arrow = l && lookbackN() ? (!l.trend.known ? " …" : l.trend.now < l.trend.prev ? " ↓" : l.trend.now > l.trend.prev ? " ↑" : " →") : "";
+    const arrow = l && lookbackN()
+      ? (!l.trend.known ? " …" : l.trend.drop > 1e-9 ? ` ↓${l.trend.drop.toFixed(1)}%` : l.trend.drop < -1e-9 ? ` ↑${(-l.trend.drop).toFixed(1)}%` : " →")
+      : "";
     const text = l ? `Low ${l.digit} · ${l.freq.toFixed(1)}%${arrow}` : `Loading ${winLen(w)}/${analysisN()}`;
     const flag = isPaused(sym) ? "PAUSED"
       : state.running && state.streak && state.streak.sym === sym ? "ACTIVE"
