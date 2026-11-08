@@ -640,8 +640,7 @@ footer p {
           <label>Trigger: digit below (%)<input id="threshold" type="number" min="1" max="20" step="0.1" value="8.5"></label>
           <label>Max trades per market (1 - 4)<input id="maxTrades" type="number" min="1" max="4" step="1" value="2"></label>
           <label>Pause a market after (its ticks)<input id="pauseTicks" type="number" min="0" max="1000" step="10" value="50"></label>
-          <label>Lowest digit must be falling vs (ticks ago, 0 = off)<input id="lookback" type="number" min="0" max="100" step="1" value="10"></label>
-          <label>Minimum fall to trade (percentage points)<input id="minDrop" type="number" min="0" max="10" step="0.1" value="0.1"></label>
+          <label>Minimum decrease to trade (percentage points)<input id="minDrop" type="number" min="0" max="10" step="0.1" value="0.1"></label>
         </div>
       </section>
 
@@ -674,7 +673,7 @@ footer p {
           <button id="startBtn" class="btn primary" type="button" disabled>Start Bot</button>
           <button id="stopBtn" class="btn warning" type="button" disabled>Stop Bot</button>
         </div>
-        <p class="small">Entry filter: the bot reads the last digit of every selected market over the analysis window. When a digit from 1 to 8 drops below the trigger (default 8.5%), the lowest one becomes the prediction and the bot instantly buys one Differs on it, without waiting for that digit to appear. That lowest digit must also be falling: its percentage now has to be lower than it was the chosen number of ticks ago by at least the minimum decrease (default 0.1%, so 8.4% to 8.3%, 8.2% or 7.4% all count). Set the ticks to 0 to turn this off. Digits 0 and 9 are never predicted. In-and-out rule: it makes at most 1 to 4 consecutive trades on a market, then pauses that market and hops to another one that qualifies. Differs wins about 90% of the time but pays only a small amount, so one loss costs far more than a win earns. Martingale can rapidly increase risk. Test on a demo account first.</p>
+        <p class="small">The bot watches every selected market tick by tick. A market's lowest digit is the digit from 1 to 8 with the lowest percentage in the analysis window (0 and 9 are never used). When that lowest digit is below the trigger (default 8.5%) and its percentage has just decreased by at least the minimum (default 0.1%) on that tick, the bot instantly buys one Differs on it. If there is no decrease, there is no trade. In-and-out rule: at most 1 to 4 back-to-back trades on one market, then that market is paused. Differs wins about 90% of the time but pays only a small amount, so one loss costs far more than a win earns. Martingale can rapidly increase risk. Test on a demo account first.</p>
       </section>
 
       <section class="panel">
@@ -694,13 +693,12 @@ footer p {
 /*
  * DERIV DIGIT DIFFERS BOT - frequency filter, multi-market
  *
- * Entry filter: for every selected market it tracks the last-digit frequency
- * over a rolling window (default 50 ticks). It only trades when a digit drops
- * BELOW the trigger (default 8.5%). That low-frequency digit becomes the
- * prediction and the bot buys a 1-tick Differs on it instantly. Digits 0 and 9
- * are NEVER predicted (safety filter).
- * In-and-out rule: at most 1-4 consecutive trades on one market, then that
- * market is paused and the bot hops to another market that qualifies.
+ * Every selected market is watched tick by tick. Its "lowest digit" is the digit
+ * from 1 to 8 (never 0 or 9) with the lowest percentage over the analysis window.
+ * TRIGGER: the moment that lowest digit is below the trigger (default 8.5%) AND its
+ * percentage has just DECREASED by at least the minimum (default 0.1%) on this very
+ * tick, the bot buys a 1-tick Differs on it, instantly. No decrease, no trade.
+ * In-and-out: at most 1-4 back-to-back trades on one market, then it is paused.
  * Stops only on your Stop, take profit, stop loss or win target.
  * Token stays in memory only. Use a DEMO account first.
  */
@@ -724,7 +722,7 @@ const state = {
   selected: MARKETS.map((m) => m[0]), watch: {},
   running: false, trades: 0, wins: 0, profit: 0, history: [], currency: "USD", balance: null,
   step: 0, stepBase: 0, tradeLog: [], reqSeq: 0, unresolved: [],
-  pendingByReq: new Map(), byContract: new Map(), payoutRatio: 0.095, histReq: new Map(), streak: null, paused: {},
+  pendingByReq: new Map(), byContract: new Map(), payoutRatio: 0.095, histReq: new Map(), streak: null, lastSym: null, consec: 0, paused: {},
   lastCfg: null, reconnectTimer: null, reconnectCount: 0, connecting: false,
   wakeLock: null, lastAnyTick: 0
 };
@@ -803,10 +801,7 @@ function watchOf(sym) {
   }
   return state.watch[sym];
 }
-function lookbackN() {
-  const v = parseInt($("lookback").value, 10);
-  return Math.min(analysisN(), Math.max(0, Number.isFinite(v) ? v : 10));
-}
+function lookbackN() { return 1; }   // a decrease is judged against the previous tick
 /* Smallest fall (in percentage points) that counts as "decreasing". Default 0.1 (e.g. 8.4% -> 8.3%). */
 function minDrop() {
   const v = parseFloat($("minDrop").value);
@@ -834,7 +829,7 @@ function trendOf(w, d) {
   const drop = ((prev - now) / n) * 100;                 // percentage points the digit has fallen
   const need = minDrop();
   const falling = drop > 1e-9 && drop >= need - 1e-9;
-  return { decreasing: falling || now === 0, known: true, now, prev, drop };
+  return { decreasing: falling, known: true, now, prev, drop };
 }
 function addDigit(w, d) {
   w.digits.push(d);
@@ -993,7 +988,7 @@ function scheduleRender() {
 }
 function renderWatch() {
   const cand = bestCandidate();
-  const focus = state.running && state.streak ? state.streak.sym : cand ? cand.sym : state.selected[0];
+  const focus = state.running && state.lastSym ? state.lastSym : cand ? cand.sym : state.selected[0];
   state.selected.forEach((sym) => {
     const r = rows[sym];
     if (!r) return;
@@ -1004,7 +999,7 @@ function renderWatch() {
       : "";
     const text = l ? `Low ${l.digit} · ${l.freq.toFixed(1)}%${arrow}` : `Loading ${winLen(w)}/${analysisN()}`;
     const flag = isPaused(sym) ? "PAUSED"
-      : state.running && state.streak && state.streak.sym === sym ? "ACTIVE"
+      : state.running && state.lastSym === sym ? "ACTIVE"
       : l && l.freq < threshold() ? (l.trend.decreasing ? "READY" : "WAIT · not falling") : "…";
     if (r.shown !== text) { r.info.textContent = text; r.shown = text; }
     if (r.flag !== flag) { r.badge.textContent = flag; r.badge.className = "badge " + (flag === "ACTIVE" || flag === "READY" ? "ok" : "no"); r.flag = flag; }
@@ -1052,6 +1047,8 @@ function stopBot(msg = "Bot stopped.", type = "") {
   state.wakeLock = null;
   state.running = false;
   state.streak = null;
+  state.lastSym = null;
+  state.consec = 0;
   state.unresolved = [];
   refreshButtons();
   showMessage(msg, type);
@@ -1061,14 +1058,13 @@ function startBot() {
   if (!state.selected.length) { showMessage("Select at least one market.", "error"); return; }
   const cfg = readConfig();
   if (!cfg) { showMessage("Check your settings. Minimum stake is 0.35.", "error"); return; }
-  Object.assign(state, { step: 0, stepBase: 0, tradeLog: [], trades: 0, wins: 0, profit: 0, unresolved: [], lastCfg: cfg, running: true, streak: null, paused: {} });
+  Object.assign(state, { step: 0, stepBase: 0, tradeLog: [], trades: 0, wins: 0, profit: 0, unresolved: [], lastCfg: cfg, running: true, streak: null, lastSym: null, consec: 0, paused: {} });
   state.pendingByReq.clear();
   state.byContract.clear();   // results of an earlier run must not leak into this one
   requestWakeLock();
   updateStats();
   refreshButtons();
-  showMessage(`Scanning ${state.selected.length} market(s) for a digit (1-8) below ${threshold()}%…`, "success");
-  tryTrade();   // trade at once if a market already qualifies
+  showMessage(`Watching ${state.selected.length} market(s). A trade fires the moment the lowest digit (1-8) is below ${threshold()}% and decreases by ${minDrop()}% or more.`, "success");
 }
 const stakeFor = (cfg) => (cfg.martingale ? round2(cfg.stake * Math.pow(cfg.multiplier, state.step)) : round2(cfg.stake));
 
@@ -1130,27 +1126,16 @@ function resolveLocal(sym, digit, epoch) {
 }
 
 /*
- * Entry: a digit (1-8) below the trigger on a market -> Differs on it, instantly.
- * In-and-out: at most N consecutive trades per market, then that market is paused
- * and the bot hops to another qualifying market.
+ * Called for the market that just ticked. If its lowest digit (1-8) is below the trigger and
+ * its percentage DECREASED on this tick by at least the minimum, buy Differs on it instantly.
+ * No decrease = no trade. In-and-out: at most N back-to-back trades on one market, then pause it.
  */
-function tryTrade() {
-  if (state.unresolved.length) return;            // one run at a time
+function onTick(sym) {
+  if (state.unresolved.length) return;                // one run at a time
+  if (isPaused(sym)) return;
+  const l = qualified(sym);                           // below the trigger AND just decreased
+  if (!l) return;
   if (!state.tradingReady) { showMessage("Account session reconnecting… trading resumes automatically.", "error"); return; }
-  const limit = maxTrades();
-  let pick = null;
-  if (state.streak && state.streak.count < limit && !isPaused(state.streak.sym)) {
-    const l = qualified(state.streak.sym);          // same market, digit re-checked every trade
-    if (l) pick = { sym: state.streak.sym, ...l };
-  }
-  if (!pick) {
-    state.streak = null;
-    pick = bestCandidate();                          // hop to another market
-  }
-  if (!pick) {
-    showMessage(`Scanning ${state.selected.length} market(s)… waiting for a digit (1-8) below ${threshold()}%${lookbackN() ? " that is falling" : ""}.`);
-    return;
-  }
   const cfg = getConfig();
   let stake = stakeFor(cfg);
   const bal = displayBalance();
@@ -1158,12 +1143,18 @@ function tryTrade() {
     if (state.step > 0) { restartMartingale(); stake = stakeFor(cfg); }
     if (stake > bal) { showMessage(`Balance ${money(bal)} is below the stake. Waiting…`, "error"); return; }
   }
-  if (!placeTrade(stake, pick.sym, pick.digit, watchOf(pick.sym).last)) return;
-  const count = state.streak && state.streak.sym === pick.sym ? state.streak.count + 1 : 1;
-  state.streak = { sym: pick.sym, count };
-  if (count >= limit) state.paused[pick.sym] = watchOf(pick.sym).ticks + pauseTicks();
-  showMessage(`${NAME[pick.sym]}: digit ${pick.digit} is only ${pick.freq.toFixed(1)}%. Differs ${pick.digit} (trade ${count}/${limit}) for ${money(stake)}${state.step ? ` · martingale step ${state.step}` : ""}.`);
-  ui(() => { $("lastDigit").textContent = String(pick.digit); $("lastDigitType").textContent = NAME[pick.sym]; });
+  if (!placeTrade(stake, sym, l.digit, watchOf(sym).last)) return;
+  const limit = maxTrades();
+  const n = state.lastSym === sym ? state.consec + 1 : 1;
+  state.lastSym = sym;
+  state.consec = n;
+  if (n >= limit) {                                   // in-and-out: pause this market
+    state.paused[sym] = watchOf(sym).ticks + pauseTicks();
+    state.lastSym = null;
+    state.consec = 0;
+  }
+  showMessage(`${NAME[sym]}: digit ${l.digit} fell ${l.trend.drop.toFixed(1)}% to ${l.freq.toFixed(1)}%. Differs ${l.digit} (trade ${n}/${limit}) for ${money(stake)}${state.step ? ` · martingale step ${state.step}` : ""}.`);
+  ui(() => { $("lastDigit").textContent = String(l.digit); $("lastDigitType").textContent = NAME[sym]; });
 }
 function sendTo(socket, payload) {
   if (!socket || socket.readyState !== WebSocket.OPEN) return false;
@@ -1228,7 +1219,7 @@ function handleTick(tick) {
   if (!w.hist || w.refreshing) w.pending.push({ d: digit, epoch });
 
   const changed = resolveLocal(sym, digit, epoch);
-  if (state.running && !checkLimits()) tryTrade();
+  if (state.running && !checkLimits()) onTick(sym);
   if (changed) { updateStats(); updateBalance(); }
   scheduleRender();
 }
@@ -1248,7 +1239,6 @@ function handleHistory(data) {
   w.pending = [];
   w.hist = true;
   w.refreshing = false;
-  if (state.running && !state.unresolved.length) tryTrade();
   scheduleRender();
 }
 
@@ -1537,11 +1527,6 @@ document.addEventListener("visibilitychange", () => {
   if (!document.hidden && state.running) requestWakeLock();
 });
 
-$("lookback").addEventListener("change", () => {
-  Object.values(state.watch).forEach((w) => { w.asked = false; w.refreshing = true; });
-  requestMissingHistory();
-  scheduleRender();
-});
 $("windowSize").addEventListener("change", () => {
   Object.values(state.watch).forEach((w) => { w.asked = false; w.refreshing = true; });
   requestMissingHistory();
