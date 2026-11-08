@@ -640,6 +640,7 @@ footer p {
           <label>Trigger: digit below (%)<input id="threshold" type="number" min="1" max="20" step="0.5" value="8.5"></label>
           <label>Max trades per market (1 - 4)<input id="maxTrades" type="number" min="1" max="4" step="1" value="2"></label>
           <label>Pause a market after (its ticks)<input id="pauseTicks" type="number" min="0" max="1000" step="10" value="50"></label>
+          <label>Lowest digit must be falling vs (ticks ago, 0 = off)<input id="lookback" type="number" min="0" max="100" step="1" value="10"></label>
         </div>
       </section>
 
@@ -672,7 +673,7 @@ footer p {
           <button id="startBtn" class="btn primary" type="button" disabled>Start Bot</button>
           <button id="stopBtn" class="btn warning" type="button" disabled>Stop Bot</button>
         </div>
-        <p class="small">Entry filter: the bot reads the last digit of every selected market over the analysis window. When a digit from 1 to 8 drops below the trigger (default 8.5%), the lowest one becomes the prediction and the bot instantly buys one Differs on it, without waiting for that digit to appear. Digits 0 and 9 are never predicted. In-and-out rule: it makes at most 1 to 4 consecutive trades on a market, then pauses that market and hops to another one that qualifies. Differs wins about 90% of the time but pays only a small amount, so one loss costs far more than a win earns. Martingale can rapidly increase risk. Test on a demo account first.</p>
+        <p class="small">Entry filter: the bot reads the last digit of every selected market over the analysis window. When a digit from 1 to 8 drops below the trigger (default 8.5%), the lowest one becomes the prediction and the bot instantly buys one Differs on it, without waiting for that digit to appear. That lowest digit must also be falling: its percentage now has to be lower than it was the chosen number of ticks ago (set 0 to turn this off). Digits 0 and 9 are never predicted. In-and-out rule: it makes at most 1 to 4 consecutive trades on a market, then pauses that market and hops to another one that qualifies. Differs wins about 90% of the time but pays only a small amount, so one loss costs far more than a win earns. Martingale can rapidly increase risk. Test on a demo account first.</p>
       </section>
 
       <section class="panel">
@@ -801,24 +802,50 @@ function watchOf(sym) {
   }
   return state.watch[sym];
 }
+function lookbackN() {
+  const v = parseInt($("lookback").value, 10);
+  return Math.min(analysisN(), Math.max(0, Number.isFinite(v) ? v : 10));
+}
+/* Ticks in the analysis window (the buffer also keeps a few older ticks for the trend check). */
+function winLen(w) { return Math.min(w.digits.length, analysisN()); }
+/*
+ * Is the digit's percentage FALLING? Compare how often it appears in the window
+ * now with the window as it was `lookback` ticks ago. Falling = fewer now than then,
+ * or already at 0% (it cannot fall further).
+ */
+function trendOf(w, d) {
+  const L = lookbackN();
+  const n = analysisN();
+  if (L === 0) return { decreasing: true, known: true, now: w.counts[d], prev: w.counts[d] };
+  if (w.digits.length < n + L) return { decreasing: false, known: false, now: w.counts[d], prev: w.counts[d] };
+  const len = w.digits.length;
+  let recent = 0, older = 0;
+  for (let i = len - L; i < len; i++) if (w.digits[i] === d) recent += 1;
+  for (let i = len - n - L; i < len - n; i++) if (w.digits[i] === d) older += 1;
+  const now = w.counts[d];
+  const prev = now - recent + older;
+  return { decreasing: now < prev || now === 0, known: true, now, prev };
+}
 function addDigit(w, d) {
   w.digits.push(d);
   w.counts[d] += 1;
   for (let i = 0; i < 10; i++) w.since[i] += 1;
   w.since[d] = 0;
   const n = analysisN();
-  while (w.digits.length > n) w.counts[w.digits.shift()] -= 1;
+  if (w.digits.length > n) w.counts[w.digits[w.digits.length - n - 1]] -= 1;   // this tick left the window
+  const keep = n + lookbackN();
+  while (w.digits.length > keep) w.digits.shift();
 }
 /* The least frequent digit among 1-8 (a tie goes to the one missing longest). */
 function lowestOf(sym) {
   const w = state.watch[sym];
-  if (!w || !w.hist || w.digits.length < Math.min(analysisN(), 25)) return null;
+  if (!w || !w.hist || winLen(w) < Math.min(analysisN(), 25)) return null;
   let best = null;
   SAFE_DIGITS.forEach((d) => {
-    const f = (w.counts[d] / w.digits.length) * 100;
+    const f = (w.counts[d] / winLen(w)) * 100;
     if (!best || f < best.freq || (f === best.freq && w.since[d] > best.since)) best = { digit: d, freq: f, since: w.since[d] };
   });
-  return { ...best, total: w.digits.length };
+  return { ...best, total: winLen(w), trend: trendOf(w, best.digit) };
 }
 function isPaused(sym) {
   const until = state.paused[sym];
@@ -826,7 +853,7 @@ function isPaused(sym) {
 }
 function qualified(sym) {
   const l = lowestOf(sym);
-  return l && l.freq < threshold() ? l : null;
+  return l && l.freq < threshold() && l.trend.decreasing ? l : null;
 }
 /* The qualifying market whose low digit is the lowest. */
 function bestCandidate() {
@@ -962,17 +989,18 @@ function renderWatch() {
     if (!r) return;
     const w = watchOf(sym);
     const l = lowestOf(sym);
-    const text = l ? `Low ${l.digit} · ${l.freq.toFixed(1)}%` : `Loading ${w.digits.length}/${analysisN()}`;
+    const arrow = l && lookbackN() ? (!l.trend.known ? " …" : l.trend.now < l.trend.prev ? " ↓" : l.trend.now > l.trend.prev ? " ↑" : " →") : "";
+    const text = l ? `Low ${l.digit} · ${l.freq.toFixed(1)}%${arrow}` : `Loading ${winLen(w)}/${analysisN()}`;
     const flag = isPaused(sym) ? "PAUSED"
       : state.running && state.streak && state.streak.sym === sym ? "ACTIVE"
-      : l && l.freq < threshold() ? "READY" : "…";
+      : l && l.freq < threshold() ? (l.trend.decreasing ? "READY" : "WAIT · not falling") : "…";
     if (r.shown !== text) { r.info.textContent = text; r.shown = text; }
     if (r.flag !== flag) { r.badge.textContent = flag; r.badge.className = "badge " + (flag === "ACTIVE" || flag === "READY" ? "ok" : "no"); r.flag = flag; }
   });
   const fw = focus ? watchOf(focus) : null;
   $("barsTitle").textContent = focus ? `Digit % · ${NAME[focus]}` : "Digit %";
   barCells.forEach((b, d) => {
-    const total = fw ? fw.digits.length : 0;
+    const total = fw ? winLen(fw) : 0;
     const pct = total ? (fw.counts[d] / total) * 100 : null;
     const text = pct === null ? "–" : pct.toFixed(1) + "%";
     const trig = pct !== null && SAFE_DIGITS.includes(d) && pct < threshold();
@@ -1108,7 +1136,7 @@ function tryTrade() {
     pick = bestCandidate();                          // hop to another market
   }
   if (!pick) {
-    showMessage(`Scanning ${state.selected.length} market(s)… waiting for a digit (1-8) below ${threshold()}%.`);
+    showMessage(`Scanning ${state.selected.length} market(s)… waiting for a digit (1-8) below ${threshold()}%${lookbackN() ? " that is falling" : ""}.`);
     return;
   }
   const cfg = getConfig();
@@ -1227,7 +1255,7 @@ function requestMissingHistory() {
     state.reqSeq += 1;
     const id = 500000 + state.reqSeq;
     state.histReq.set(id, s);
-    sendTo(state.pub, { ticks_history: s, end: "latest", count: analysisN(), style: "ticks", subscribe: 0, req_id: id });
+    sendTo(state.pub, { ticks_history: s, end: "latest", count: analysisN() + lookbackN(), style: "ticks", subscribe: 0, req_id: id });
   });
 }
 function syncMarkets() {
@@ -1497,6 +1525,11 @@ document.addEventListener("visibilitychange", () => {
   if (!document.hidden && state.running) requestWakeLock();
 });
 
+$("lookback").addEventListener("change", () => {
+  Object.values(state.watch).forEach((w) => { w.asked = false; w.refreshing = true; });
+  requestMissingHistory();
+  scheduleRender();
+});
 $("windowSize").addEventListener("change", () => {
   Object.values(state.watch).forEach((w) => { w.asked = false; w.refreshing = true; });
   requestMissingHistory();
