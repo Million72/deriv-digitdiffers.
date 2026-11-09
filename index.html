@@ -640,7 +640,8 @@ footer p {
           <label>Trigger: digit below (%)<input id="threshold" type="number" min="1" max="20" step="0.1" value="8.5"></label>
           <label>Max trades per market (1 - 4)<input id="maxTrades" type="number" min="1" max="4" step="1" value="2"></label>
           <label>Pause a market after (its ticks)<input id="pauseTicks" type="number" min="0" max="1000" step="10" value="50"></label>
-          <label>Minimum change per step, up then down (percentage points)<input id="minDrop" type="number" min="0" max="10" step="0.1" value="0.1"></label>
+          <label>Ticks for each step (1 - 10): fall, then rise<input id="stepTicks" type="number" min="1" max="10" step="1" value="1"></label>
+          <label>Minimum change per step, down then up (percentage points)<input id="minDrop" type="number" min="0" max="10" step="0.1" value="0.1"></label>
         </div>
       </section>
 
@@ -659,7 +660,7 @@ footer p {
       </section>
 
       <section class="panel">
-        <div class="section-heading"><h3>Trading Configuration</h3><span class="small">Differs · 1 tick</span></div>
+        <div class="section-heading"><h3>Trading Configuration</h3><span class="small" id="durationLabel">Differs · 1 tick</span></div>
         <div class="form-grid">
           <label>Initial Stake (USD)<input id="stake" type="number" min="0.35" step="0.01" value="0.35"></label>
           <label>Martingale Multiplier<input id="multiplier" type="number" min="1" step="0.05" value="2"></label>
@@ -667,13 +668,14 @@ footer p {
           <label>Take Profit (USD)<input id="takeProfit" type="number" min="0.01" step="0.01" value="5.00"></label>
           <label>Stop Loss (USD)<input id="stopLoss" type="number" min="0.01" step="0.01" value="5.00"></label>
           <label>Target Wins (0 = no limit)<input id="targetWins" type="number" min="0" step="1" value="0"></label>
+          <label>Contract Duration (ticks, 1 - 10)<input id="duration" type="number" min="1" max="10" step="1" value="1"></label>
         </div>
         <label class="checkbox-row"><input id="martingaleEnabled" type="checkbox" checked><span>Enable Martingale after a loss</span></label>
         <div class="button-row">
           <button id="startBtn" class="btn primary" type="button" disabled>Start Bot</button>
           <button id="stopBtn" class="btn warning" type="button" disabled>Stop Bot</button>
         </div>
-        <p class="small">The bot watches every selected market tick by tick. A market's lowest digit is the digit from 1 to 8 with the lowest percentage in the analysis window (0 and 9 are never used). When that lowest digit is below the trigger (default 8.5%) and its percentage increases by at least the minimum (default 0.1%) on one tick and then decreases by at least the minimum on the very next tick (for example 8.3% to 8.4% to 8.3%), the bot instantly buys one Differs on it. If it increases and does not decrease on the next tick, there is no trade. In-and-out rule: at most 1 to 4 back-to-back trades on one market, then that market is paused. Differs wins about 90% of the time but pays only a small amount, so one loss costs far more than a win earns. Martingale can rapidly increase risk. Test on a demo account first.</p>
+        <p class="small">The bot watches every selected market tick by tick. A market's lowest digit is the digit from 1 to 8 with the lowest percentage in the analysis window (0 and 9 are never used). When that lowest digit is below the trigger (default 8.5%) and its percentage decreases by at least the minimum (default 0.1%) over the set number of ticks and then increases by at least the minimum over the next same number of ticks (for example 8.4% to 8.3% to 8.4%), the bot instantly buys one Differs on it. If it decreases and does not increase, there is no trade. In-and-out rule: at most 1 to 4 back-to-back trades on one market, then that market is paused. Differs wins about 90% of the time but pays only a small amount, so one loss costs far more than a win earns. Martingale can rapidly increase risk. Test on a demo account first.</p>
       </section>
 
       <section class="panel">
@@ -695,10 +697,10 @@ footer p {
  *
  * Every selected market is watched tick by tick. Its "lowest digit" is the digit
  * from 1 to 8 (never 0 or 9) with the lowest percentage over the analysis window.
- * TRIGGER (increase then decrease): the lowest digit is below the trigger (default 8.5%) and its
- * percentage INCREASES by at least the minimum (default 0.1%) on one tick, then DECREASES by at
- * least the minimum on the NEXT tick (e.g. 8.3% -> 8.4% -> 8.3%). The bot then buys a 1-tick
- * Differs on that digit instantly. Increase without a decrease on the next tick = no trade.
+ * TRIGGER (decrease then increase): the lowest digit is below the trigger (default 8.5%) and its
+ * percentage DECREASES by at least the minimum (default 0.1%) over N ticks (user setting, default 1),
+ * then INCREASES by at least the minimum over the next N ticks (e.g. 8.4% -> 8.3% -> 8.4%). The bot then buys a 1-tick
+ * Differs on that digit instantly. Decrease without the increase = no trade.
  * In-and-out: at most 1-4 back-to-back trades on one market, then it is paused.
  * Stops only on your Stop, take profit, stop loss or win target.
  * Token stays in memory only. Use a DEMO account first.
@@ -802,7 +804,11 @@ function watchOf(sym) {
   }
   return state.watch[sym];
 }
-function lookbackN() { return 1; }   // a decrease is judged against the previous tick
+/* Ticks per step: the fall is measured over this many ticks, then the rise over the next this many ticks. */
+function lookbackN() {
+  const v = parseInt($("stepTicks").value, 10);
+  return Math.min(10, Math.max(1, Number.isFinite(v) ? v : 1));
+}
 /* Smallest fall (in percentage points) that counts as "decreasing". Default 0.1 (e.g. 8.4% -> 8.3%). */
 function minDrop() {
   const v = parseFloat($("minDrop").value);
@@ -863,28 +869,36 @@ function qualified(sym) {
   return l && l.freq < threshold() && l.trend.decreasing ? l : null;
 }
 /*
- * INCREASE -> DECREASE signal. On every tick of a market:
- *  1) if the previous tick "armed" a digit (it was the lowest digit, below the trigger, and rose by the
- *     minimum), check that digit now. If it has DECREASED by the minimum on this tick -> return the signal.
- *     If it did not decrease, the setup is dropped and there is no trade.
- *  2) then check whether THIS tick arms a new digit (lowest digit, below the trigger, just increased).
+ * DECREASE -> INCREASE signal. On every tick of a market:
+ *  1) if the previous tick "armed" a digit (it was the lowest digit, below the trigger, and fell by the
+ *     minimum), check that digit now. If it has INCREASED by the minimum on this tick -> return the signal.
+ *     If it did not increase, the setup is dropped and there is no trade.
+ *  2) then check whether THIS tick arms a new digit (lowest digit, below the trigger, just decreased).
  */
 function advanceSignal(sym) {
   const w = watchOf(sym);
   if (!w.hist) { w.setup = null; return null; }
-  const armed = w.setup;
-  w.setup = null;
+  const L = lookbackN();
   let hit = null;
-  if (armed && armed.tick === w.ticks - 1) {
-    const t = trendOf(w, armed.digit);
-    const total = winLen(w);
-    const freq = total ? (w.counts[armed.digit] / total) * 100 : 100;
-    if (t.known && t.decreasing && freq < threshold()) {
-      hit = { digit: armed.digit, freq, total, since: w.since[armed.digit], trend: t, fell: armed.drop, from: armed.freq };
+  const armed = w.setup;
+  if (armed) {
+    const age = w.ticks - armed.tick;
+    if (age >= L) {                                  // the rise must be judged exactly L ticks after the fall
+      w.setup = null;
+      if (age === L) {
+        const t = trendOf(w, armed.digit);
+        const total = winLen(w);
+        const freq = total ? (w.counts[armed.digit] / total) * 100 : 100;
+        if (t.known && t.rising && freq < threshold()) {
+          hit = { digit: armed.digit, freq, total, since: w.since[armed.digit], trend: t, fell: armed.drop, from: armed.freq };
+        }
+      }
     }
   }
-  const l = lowestOf(sym);
-  if (l && l.freq < threshold() && l.trend.rising) w.setup = { digit: l.digit, tick: w.ticks, drop: l.trend.drop, freq: l.freq };
+  if (!w.setup) {
+    const l = lowestOf(sym);
+    if (l && l.freq < threshold() && l.trend.decreasing) w.setup = { digit: l.digit, tick: w.ticks, drop: l.trend.drop, freq: l.freq };
+  }
   return hit;
 }
 /* The qualifying market whose low digit is the lowest. */
@@ -1027,8 +1041,8 @@ function renderWatch() {
     const text = l ? `Low ${l.digit} · ${l.freq.toFixed(1)}%${arrow}` : `Loading ${winLen(w)}/${analysisN()}`;
     const flag = isPaused(sym) ? "PAUSED"
       : state.running && state.lastSym === sym ? "ACTIVE"
-      : w.setup ? "ARMED · waiting ↓"
-      : l && l.freq < threshold() ? "WAIT · needs ↑ first" : "…";
+      : w.setup ? "ARMED · waiting ↑"
+      : l && l.freq < threshold() ? "WAIT · needs ↓ first" : "…";
     if (r.shown !== text) { r.info.textContent = text; r.shown = text; }
     if (r.flag !== flag) { r.badge.textContent = flag; r.badge.className = "badge " + (flag === "ACTIVE" || flag.startsWith("ARMED") ? "ok" : "no"); r.flag = flag; }
   });
@@ -1051,10 +1065,12 @@ function readConfig() {
     stake: Number($("stake").value), takeProfit: Number($("takeProfit").value),
     stopLoss: Number($("stopLoss").value), multiplier: Number($("multiplier").value),
     maxSteps: Number($("maxSteps").value), targetWins: Number($("targetWins").value || 0),
-    martingale: $("martingaleEnabled").checked
+    martingale: $("martingaleEnabled").checked,
+    duration: Number($("duration").value)
   };
   const ok = c.stake >= 0.35 && c.takeProfit > 0 && c.stopLoss > 0 && c.multiplier >= 1 &&
-    Number.isInteger(c.maxSteps) && c.maxSteps >= 0 && Number.isInteger(c.targetWins) && c.targetWins >= 0;
+    Number.isInteger(c.maxSteps) && c.maxSteps >= 0 && Number.isInteger(c.targetWins) && c.targetWins >= 0 &&
+    Number.isInteger(c.duration) && c.duration >= 1 && c.duration <= 10;
   return ok ? c : null;
 }
 function getConfig() {
@@ -1085,14 +1101,19 @@ function startBot() {
   if (!state.tradingReady || !state.account) { showMessage("Press Connect Account first.", "error"); return; }
   if (!state.selected.length) { showMessage("Select at least one market.", "error"); return; }
   const cfg = readConfig();
-  if (!cfg) { showMessage("Check your settings. Minimum stake is 0.35.", "error"); return; }
+  if (!cfg) { showMessage("Check your settings. Minimum stake is 0.35 and duration is 1 to 10 ticks.", "error"); return; }
   Object.assign(state, { step: 0, stepBase: 0, tradeLog: [], trades: 0, wins: 0, profit: 0, unresolved: [], lastCfg: cfg, running: true, streak: null, lastSym: null, consec: 0, paused: {} });
   state.pendingByReq.clear();
   state.byContract.clear();   // results of an earlier run must not leak into this one
   requestWakeLock();
   updateStats();
   refreshButtons();
-  showMessage(`Watching ${state.selected.length} market(s). A trade fires when the lowest digit (1-8) is below ${threshold()}%, rises by ${minDrop()}% or more, and then falls by ${minDrop()}% or more on the very next tick.`, "success");
+  showMessage(`Watching ${state.selected.length} market(s). A trade fires when the lowest digit (1-8) is below ${threshold()}%, falls by ${minDrop()}% or more over ${lookbackN()} tick(s), and then rises by ${minDrop()}% or more over the next ${lookbackN()} tick(s).`, "success");
+}
+function updateDurationLabel() {
+  const n = parseInt($("duration").value, 10);
+  const v = Number.isInteger(n) && n >= 1 && n <= 10 ? n : 1;
+  $("durationLabel").textContent = `Differs · ${v} tick${v > 1 ? "s" : ""}`;
 }
 const stakeFor = (cfg) => (cfg.martingale ? round2(cfg.stake * Math.pow(cfg.multiplier, state.step)) : round2(cfg.stake));
 
@@ -1142,6 +1163,8 @@ function resolveLocal(sym, digit, epoch) {
     if (t.symbol !== sym) return;
     const ready = Number.isFinite(t.startTime) ? epoch > t.startTime : epoch > t.placedEpoch;
     if (!ready) return;
+    t.ticksSeen = (t.ticksSeen || 0) + 1;
+    if (t.ticksSeen < (t.duration || 1)) return;      // the deciding digit is the last tick of the contract
     state.unresolved = state.unresolved.filter((x) => x !== t);
     t.resolvedEpoch = epoch;
     t.localWon = digit !== t.digit;
@@ -1169,7 +1192,7 @@ function onTick(sym, l) {
     if (state.step > 0) { restartMartingale(); stake = stakeFor(cfg); }
     if (stake > bal) { showMessage(`Balance ${money(bal)} is below the stake. Waiting…`, "error"); return; }
   }
-  if (!placeTrade(stake, sym, l.digit, watchOf(sym).last)) return;
+  if (!placeTrade(stake, sym, l.digit, watchOf(sym).last, cfg.duration)) return;
   const limit = maxTrades();
   const n = state.lastSym === sym ? state.consec + 1 : 1;
   state.lastSym = sym;
@@ -1179,7 +1202,7 @@ function onTick(sym, l) {
     state.lastSym = null;
     state.consec = 0;
   }
-  showMessage(`${NAME[sym]}: digit ${l.digit} rose ${(-l.fell).toFixed(1)}% to ${l.from.toFixed(1)}%, then fell ${l.trend.drop.toFixed(1)}% to ${l.freq.toFixed(1)}%. Differs ${l.digit} (trade ${n}/${limit}) for ${money(stake)}${state.step ? ` · martingale step ${state.step}` : ""}.`);
+  showMessage(`${NAME[sym]}: digit ${l.digit} fell ${l.fell.toFixed(1)}% to ${l.from.toFixed(1)}%, then rose ${(-l.trend.drop).toFixed(1)}% to ${l.freq.toFixed(1)}% (${lookbackN()} tick${lookbackN() > 1 ? 's' : ''} per step). Differs ${l.digit} (trade ${n}/${limit}) for ${money(stake)}${state.step ? ` · martingale step ${state.step}` : ""}.`);
   ui(() => { $("lastDigit").textContent = String(l.digit); $("lastDigitType").textContent = NAME[sym]; });
 }
 function sendTo(socket, payload) {
@@ -1187,16 +1210,16 @@ function sendTo(socket, payload) {
   socket.send(JSON.stringify(payload));
   return true;
 }
-function placeTrade(stake, sym, digit, epoch) {
+function placeTrade(stake, sym, digit, epoch, duration = 1) {
   if (!state.running) return false;   // never buy after a stop
   state.reqSeq += 1;
   const reqId = 100000 + state.reqSeq;
-  const trade = { reqId, stake, symbol: sym, digit, localWon: null, placedEpoch: epoch, startTime: NaN, settled: false };
+  const trade = { reqId, stake, symbol: sym, digit, localWon: null, placedEpoch: epoch, startTime: NaN, settled: false, duration, ticksSeen: 0 };
   const sent = sendTo(state.tradeSocket, {
     buy: 1, price: stake,
     parameters: {
       amount: stake, basis: "stake", contract_type: "DIGITDIFF", barrier: String(digit),
-      currency: state.currency, duration: 1, duration_unit: "t", underlying_symbol: sym
+      currency: state.currency, duration, duration_unit: "t", underlying_symbol: sym
     },
     req_id: reqId
   });
@@ -1426,7 +1449,7 @@ function handleTradeMessage(d) {
     }
     trade.startTime = Number(d.buy.start_time ?? d.buy.purchase_time);
     if (trade.localWon !== null && Number.isFinite(trade.startTime) && trade.resolvedEpoch <= trade.startTime) {
-      trade.localWon = null; trade.est = undefined; trade.resolvedEpoch = undefined;
+      trade.localWon = null; trade.est = undefined; trade.resolvedEpoch = undefined; trade.ticksSeen = 0;
       state.unresolved.push(trade);
       recomputeStep();
     }
@@ -1530,6 +1553,7 @@ async function connectAccount() {
 
 /* ---------- events + init ---------- */
 $("connectBtn").addEventListener("click", connectAccount);
+$("duration").addEventListener("input", updateDurationLabel);
 $("startBtn").addEventListener("click", startBot);
 $("stopBtn").addEventListener("click", () => stopBot("Bot stopped manually."));
 $("clearHistoryBtn").addEventListener("click", () => { state.history = []; renderHistory(); });
@@ -1555,11 +1579,11 @@ document.addEventListener("visibilitychange", () => {
   if (!document.hidden && state.running) requestWakeLock();
 });
 
-$("windowSize").addEventListener("change", () => {
+["windowSize", "stepTicks"].forEach((id) => $(id).addEventListener("change", () => {
   Object.values(state.watch).forEach((w) => { w.asked = false; w.refreshing = true; });
   requestMissingHistory();
   scheduleRender();
-});
+}));
 
 const chips = $("marketList");
 MARKETS.forEach(([sym, label]) => {
