@@ -1075,7 +1075,8 @@ th {
           <label>Max consecutive steps<input id="mgSteps" type="number" min="1" max="10" step="1" value="2"></label>
         </div>
         <p id="mgInfo" class="small">Martingale: disabled.</p>
-        <label class="checkbox-row"><input id="autoBuy" type="checkbox"><span>Enable automatic buying only after a market passes its out-of-sample paper gate</span></label>
+        <label class="checkbox-row"><input id="autoBuy" type="checkbox"><span>Enable automatic buying (LIVE trades on the selected account)</span></label>
+        <label class="checkbox-row"><input id="skipGate" type="checkbox"><span>⚠ Skip paper validation gate — LIVE trades will fire on every stable signal, even when paper results have not validated an edge. Required to trade on a REAL account.</span></label>
         <label class="checkbox-row"><input id="allowReal" type="checkbox"><span>Explicitly authorize automatic trading on a REAL account (leave off for DEMO)</span></label>
         <label class="checkbox-row"><input id="paperStops" type="checkbox"><span>Also apply stop-loss / take-profit to PAPER validation (engine stops when either mode breaches SL/TP; otherwise paper runs indefinitely)</span></label>
         <div class="button-row">
@@ -1468,7 +1469,8 @@ function maybeQuote(sym) {
   if (isReal && auto && (!$("allowReal").checked || !state.realConfirmed)) {
     return;
   }
-  const mode = auto && gatePass(m) ? "LIVE" : "PAPER", st = computeStake(mode);
+  const skipGate = $("skipGate").checked;
+  const mode = auto && (skipGate || gatePass(m)) ? "LIVE" : "PAPER", st = computeStake(mode);
   const req = ++state.reqSeq;
   m.lastQuoteAt = now();
   state.lastGlobalQuote = now();
@@ -1545,7 +1547,8 @@ function handleProposal(d) {
   }
   const minEV = Math.max(0, Number($("evMargin").value) || 0);
   const ev = latest.pWinLCB * payout - ask;
-  const auto = p.mode === "LIVE" && gatePass(m) && ev > minEV;
+  const skipGate = $("skipGate").checked;
+  const auto = p.mode === "LIVE" && (skipGate || (gatePass(m) && ev > minEV));
   const entry = {
     barrier: latest.barrier,
     pWin: latest.pWin,
@@ -1614,7 +1617,8 @@ function handleBuy(d) {
   };
   state.byContract.set(b.contract_id, trade);
   send(state.tradeSocket, { proposal_open_contract: 1, contract_id: b.contract_id, subscribe: 1 });
-  showMessage(`LIVE contract purchased: ${NAME[p.sym]}, DIGITDIFF barrier ${trade.barrier}, 1 tick, stake ${money(trade.stake)}.`, "success");
+  const acc = state.account.account_type === "real" ? "REAL" : "DEMO";
+  showMessage(`${acc} LIVE contract purchased: ${NAME[p.sym]}, DIGITDIFF barrier ${trade.barrier}, 1 tick, stake ${money(trade.stake)}.`, "success");
 }
 function settleContract(poc) {
   const t = state.byContract.get(poc.contract_id);
@@ -1985,7 +1989,9 @@ function startEngine() {
   $("engineStatus").textContent = "SCANNING";
   $("startBtn").disabled = true;
   $("stopBtn").disabled = false;
-  showMessage("ADEE started. Collecting ticks and requesting live quotes for paper validation.", "success");
+  const acc = state.account.account_type === "real" ? "REAL" : "DEMO";
+  const mode = !$("autoBuy").checked ? "paper validation only" : $("skipGate").checked ? `LIVE on ${acc} — ⚠ gate SKIPPED, trades fire on every stable signal` : `LIVE on ${acc} — requires paper gate to pass`;
+  showMessage(`ADEE started: ${mode}.`, $("autoBuy").checked && $("skipGate").checked ? "error" : "success");
 }
 function stopEngine(msg = "Engine stopped.") {
   state.running = false;
@@ -2063,8 +2069,21 @@ function render() {
     $("mgInfo").textContent = `Martingale off · base stake ${money(stake())} · SL ${money(slVal)} (${rooms}) · TP ${money(tpVal)}`;
   }
   const auto = $("autoBuy").checked;
-  $("modeBadge").textContent = auto ? "AUTO BUY · VALIDATED ONLY" : "PAPER VALIDATION";
-  $("modeBadge").className = "badge " + (auto ? "good" : "warn");
+  const skip = $("skipGate").checked;
+  const accType = state.account ? state.account.account_type.toUpperCase() : "—";
+  let badge, cls;
+  if (!auto) {
+    badge = "PAPER VALIDATION";
+    cls = "warn";
+  } else if (skip) {
+    badge = `LIVE · ${accType} · GATE SKIPPED`;
+    cls = "bad";
+  } else {
+    badge = `LIVE · ${accType} · GATED`;
+    cls = "good";
+  }
+  $("modeBadge").textContent = badge;
+  $("modeBadge").className = "badge " + cls;
   const w = $("watch");
   w.innerHTML = "";
   state.selected.forEach(sym => {
@@ -2143,6 +2162,7 @@ $("allowReal").addEventListener("change", () => {
   render();
 });
 $("minPaper").addEventListener("change", render);
+$("skipGate").addEventListener("change", render);
 $("paperStops").addEventListener("change", render);
 $("stake").addEventListener("change", () => {
   if (Number($("stake").value) < .35) {
@@ -2219,3 +2239,5 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
+      
