@@ -1071,18 +1071,19 @@ th {
         </div>
         <label class="checkbox-row"><input id="mgEnabled" type="checkbox"><span>Enable Martingale on LIVE and PAPER trades (stake multiplies after each loss, resets after a win)</span></label>
         <div class="form-grid" id="mgFields">
-          <label>Martingale multiplier<input id="mgMult" type="number" min="1.1" max="20" step="0.1" value="11"></label>
+          <label>Martingale multiplier<input id="mgMult" type="number" min="1.1" max="1000" step="0.1" value="2"></label>
           <label>Max consecutive steps<input id="mgSteps" type="number" min="1" max="10" step="1" value="2"></label>
         </div>
         <p id="mgInfo" class="small">Martingale: disabled.</p>
         <label class="checkbox-row"><input id="autoBuy" type="checkbox"><span>Enable automatic buying only after a market passes its out-of-sample paper gate</span></label>
         <label class="checkbox-row"><input id="allowReal" type="checkbox"><span>Explicitly authorize automatic trading on a REAL account (leave off for DEMO)</span></label>
+        <label class="checkbox-row"><input id="paperStops" type="checkbox"><span>Also apply stop-loss / take-profit to PAPER validation (engine stops when either mode breaches SL/TP; otherwise paper runs indefinitely)</span></label>
         <div class="button-row">
           <button id="startBtn" class="btn primary" type="button" disabled>Start ADEE</button>
           <button id="stopBtn" class="btn warning" type="button" disabled>Stop Engine</button>
           <button id="resetPaperBtn" class="btn secondary" type="button">Reset paper validation</button>
         </div>
-        <p class="small">Martingale is optional (off by default). When enabled, it scales both LIVE and PAPER stakes so paper results reflect the staked strategy. Each mode maintains its own cycle and is budgeted against its own session P/L. No forced entries. Only markets with 4/4 window agreement are traded. The bot first requests a live proposal, records its actual payout, and observes the next tick in paper mode. Automatic buying remains blocked for each market until its paper results show a positive 95% lower confidence bound on mean net return. A positive historical result still does not guarantee future profitability.</p>
+        <p class="small">Stake, stop-loss, and take-profit are user values, honored as written. Martingale (off by default) scales stakes by the configured multiplier per level; if a stake would breach the stop-loss or exceed balance, the cycle resets and the trade is skipped. Stop-loss / take-profit apply to LIVE trades; check "Also apply to PAPER" to enforce them in paper mode. No forced entries. Only markets with 4/4 window agreement are traded.</p>
       </section>
 
       <section class="panel">
@@ -1415,17 +1416,10 @@ function mgMaxSteps() {
   return Math.max(1, Math.min(10, Math.floor(Number($("mgSteps").value) || 2)));
 }
 function mgMult() {
-  return Math.max(1.1, Math.min(20, Number($("mgMult").value) || 11));
+  return Math.max(1.1, Math.min(1000, Number($("mgMult").value) || 2));
 }
 function mgKey(mode) {
   return mode === "LIVE" ? "mgLevelLive" : "mgLevelPaper";
-}
-function mgPnl(mode) {
-  return mode === "LIVE" ? state.liveProfit : state.paperProfit;
-}
-function mgBudget(mode) {
-  const sl = Math.max(.35, Number($("stopLoss").value) || 3);
-  return Math.max(0, sl + Math.min(0, mgPnl(mode)));
 }
 function computeStake(mode) {
   const base = stake();
@@ -1436,8 +1430,7 @@ function computeStake(mode) {
   if (level <= 0) {
     return base;
   }
-  const want = round(base * Math.pow(mgMult(), level));
-  return Math.max(base, Math.min(want, mgBudget(mode)));
+  return round(base * Math.pow(mgMult(), level));
 }
 function mgUpdate(pnl, mode) {
   if (!mgOn()) {
@@ -1508,6 +1501,9 @@ function resolvePaper(sym, m, p, digit) {
   }
   state.paperProfit = round(state.paperProfit + pnl);
   mgUpdate(pnl, "PAPER");
+  if ($("paperStops").checked) {
+    checkRisk();
+  }
   addLog({
     time: new Date().toLocaleTimeString(),
     sym,
@@ -1563,7 +1559,16 @@ function handleProposal(d) {
   if (auto) {
     const bal = state.balance;
     if (bal !== null && ask > bal) {
-      showMessage("Risk guardian blocked trade: stake exceeds available balance.", "error");
+      state[mgKey(p.mode)] = 0;
+      showMessage(`Risk guardian: stake ${money(ask)} exceeds balance ${money(bal)}. Martingale cycle reset.`, "error");
+      return;
+    }
+    // Pre-trade stop-loss guard: reject any stake that would breach the user's SL
+    const sl = Math.max(.35, Number($("stopLoss").value) || 3);
+    const remaining = Math.max(0, sl + state.liveProfit);
+    if (ask > remaining) {
+      state[mgKey("LIVE")] = 0;
+      showMessage(`Risk guardian: stake ${money(ask)} would breach stop-loss (remaining ${money(remaining)}). Cycle reset, trade skipped.`, "error");
       return;
     }
     const buyReq = ++state.reqSeq;
@@ -1572,6 +1577,12 @@ function handleProposal(d) {
       state.pendingProposals.delete(buyReq);
     }
   } else {
+    if (p.mode === "LIVE") {
+      // Quoted at the LIVE ladder stake; re-size to the PAPER ladder, keeping the payout/stake ratio.
+      const paperStake = computeStake("PAPER");
+      entry.payout = payout * (paperStake / ask);
+      entry.stake = paperStake;
+    }
     m.paperPending = entry;
     $("lastBarrier").textContent = String(entry.barrier);
     showMessage(`${NAME[p.sym]} paper sample armed: barrier ${entry.barrier}; conservative estimated win LCB ${(entry.pWinLCB * 100).toFixed(2)}%; window agreement ${latest.agreement}/4; quoted payout ${money(payout)}.`);
@@ -1642,13 +1653,25 @@ function addLog(x) {
   render();
 }
 function checkRisk() {
-  const pl = state.liveProfit;
   const sl = Math.max(.35, Number($("stopLoss").value) || 3);
   const tp = Math.max(.35, Number($("takeProfit").value) || 2);
-  if (pl <= -sl) {
-    stopEngine("Risk guardian: session stop-loss reached.");
-  } else if (pl >= tp) {
-    stopEngine("Session take-profit reached. Engine stopped.");
+  if (state.liveProfit <= -sl) {
+    stopEngine(`LIVE stop-loss reached (${money(state.liveProfit)}). Engine stopped.`);
+    return;
+  }
+  if (state.liveProfit >= tp) {
+    stopEngine(`LIVE take-profit reached (${money(state.liveProfit)}). Engine stopped.`);
+    return;
+  }
+  if ($("paperStops").checked) {
+    if (state.paperProfit <= -sl) {
+      stopEngine(`PAPER stop-loss reached (${money(state.paperProfit)}). Engine stopped.`);
+      return;
+    }
+    if (state.paperProfit >= tp) {
+      stopEngine(`PAPER take-profit reached (${money(state.paperProfit)}). Engine stopped.`);
+      return;
+    }
   }
 }
 
@@ -2023,16 +2046,21 @@ function render() {
   const samples = Object.values(state.mk).reduce((n, m) => n + m.paper.length, 0);
   $("paperSamples").textContent = samples;
   $("mgFields").style.opacity = mgOn() ? "1" : ".5";
+  const slVal = Math.max(.35, Number($("stopLoss").value) || 3);
+  const tpVal = Math.max(.35, Number($("takeProfit").value) || 2);
+  const remLive = Math.max(0, slVal + state.liveProfit);
+  const remPaper = Math.max(0, slVal + state.paperProfit);
+  const rooms = `LIVE room ${money(remLive)}${$("paperStops").checked ? ", PAPER room " + money(remPaper) : ""}`;
   if (mgOn()) {
     const lL = state.mgLevelLive || 0;
     const lP = state.mgLevelPaper || 0;
     const sL = computeStake("LIVE");
     const sP = computeStake("PAPER");
-    const capL = lL > 0 && sL < round(stake() * Math.pow(mgMult(), lL)) ? " [budget cap]" : "";
-    const capP = lP > 0 && sP < round(stake() * Math.pow(mgMult(), lP)) ? " [budget cap]" : "";
-    $("mgInfo").textContent = `Martingale: ON · LIVE ${lL}/${mgMaxSteps()} next ${money(sL)}${capL} (budget ${money(mgBudget("LIVE"))}) · PAPER ${lP}/${mgMaxSteps()} next ${money(sP)}${capP} (budget ${money(mgBudget("PAPER"))})`;
+    const warnL = lL > 0 && sL > remLive ? " ⚠ would breach SL" : "";
+    const warnP = lP > 0 && $("paperStops").checked && sP > remPaper ? " ⚠ would breach SL" : "";
+    $("mgInfo").textContent = `Martingale ON (×${mgMult()}) · LIVE lvl ${lL}/${mgMaxSteps()} next ${money(sL)}${warnL} · PAPER lvl ${lP}/${mgMaxSteps()} next ${money(sP)}${warnP} · SL ${money(slVal)} (${rooms}) · TP ${money(tpVal)}`;
   } else {
-    $("mgInfo").textContent = "Martingale: disabled.";
+    $("mgInfo").textContent = `Martingale off · base stake ${money(stake())} · SL ${money(slVal)} (${rooms}) · TP ${money(tpVal)}`;
   }
   const auto = $("autoBuy").checked;
   $("modeBadge").textContent = auto ? "AUTO BUY · VALIDATED ONLY" : "PAPER VALIDATION";
@@ -2105,7 +2133,7 @@ $("mgEnabled").addEventListener("change", () => {
   state.mgLevelPaper = 0;
   render();
 });
-["mgMult", "mgSteps", "stake"].forEach(id => $(id).addEventListener("change", () => {
+["mgMult", "mgSteps", "stake", "stopLoss", "takeProfit"].forEach(id => $(id).addEventListener("change", () => {
   state.mgLevelLive = 0;
   state.mgLevelPaper = 0;
   render();
@@ -2115,6 +2143,7 @@ $("allowReal").addEventListener("change", () => {
   render();
 });
 $("minPaper").addEventListener("change", render);
+$("paperStops").addEventListener("change", render);
 $("stake").addEventListener("change", () => {
   if (Number($("stake").value) < .35) {
     $("stake").value = "0.35";
