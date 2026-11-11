@@ -1,12 +1,18 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Deriv ADEE Digit Differs Bot</title><meta name="theme-color" content="#080d18">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deriv ADEE Digit Differs Bot</title>
+  <meta name="theme-color" content="#080d18">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Digit Differs">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png"><style>
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <style>
 :root {
   --bg: #080d18;
   --panel: #111a2b;
@@ -140,8 +146,14 @@ select {
 }
 
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 #20d99a66; }
-  50% { box-shadow: 0 0 0 7px #20d99a00; }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 #20d99a66;
+  }
+
+  50% {
+    box-shadow: 0 0 0 7px #20d99a00;
+  }
 }
 
 .message {
@@ -574,233 +586,1576 @@ footer p {
   }
 }
 
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
-.chip{flex-direction:row;align-items:center;gap:8px;padding:9px 11px;background:#0b1220;border:1px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer}
-.chip input{width:16px;min-height:16px;height:16px;accent-color:var(--green)}
-.scan-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px}
-.scan-row.active span{color:var(--green);font-weight:700}
-.badge{padding:3px 9px;border-radius:12px;font-size:10px;font-weight:800;white-space:nowrap}
-.badge.ok{color:var(--green);background:#20d99a18;border:1px solid #20d99a55}
-.badge.no{color:var(--muted);border:1px solid var(--border)}
-.bars{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
-.bar{padding:9px 0;text-align:center;border-radius:8px;background:#0b1220;border:1px solid var(--border);font-size:10px;color:var(--muted)}
-.bar strong{display:block;font-size:16px;color:var(--text)}
-.bar.low strong{color:#ff8197}
-.bar.high strong{color:var(--green)}
-.bar.good{border-color:#20d99a99}
-.sub{margin:14px 0 0;font-size:12px;color:var(--muted)}
-.real{color:var(--red)!important;font-weight:700}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
 
-  
-.digits{flex:1;text-align:center;font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px}
-.bars{grid-template-columns:repeat(5,1fr)}
+.chip {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  background: #0b1220;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
 
-[hidden]{display:none!important}
-.install-row{display:flex;align-items:center;gap:10px;margin:12px 0 0}
-.acct-switch{display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap}
-.seg-btn{min-height:36px;padding:7px 18px;border-radius:8px;border:1px solid var(--border);background:#0b1220;color:var(--text);font-weight:700;cursor:pointer}
-.seg-btn.on{background:var(--green);color:#06140f;border-color:var(--green)}
-.seg-btn.real.on{background:var(--red);color:#fff;border-color:var(--red)}
-.seg-btn:disabled{opacity:.4;cursor:not-allowed}
+.chip input {
+  width: 16px;
+  min-height: 16px;
+  height: 16px;
+  accent-color: var(--green);
+}
+
+.scan-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.scan-row.active span {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.badge {
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.badge.ok {
+  color: var(--green);
+  background: #20d99a18;
+  border: 1px solid #20d99a55;
+}
+
+.badge.no {
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.bars {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.bar {
+  padding: 9px 0;
+  text-align: center;
+  border-radius: 8px;
+  background: #0b1220;
+  border: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.bar strong {
+  display: block;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.bar.low strong {
+  color: #ff8197;
+}
+
+.bar.high strong {
+  color: var(--green);
+}
+
+.bar.good {
+  border-color: #20d99a99;
+}
+
+.sub {
+  margin: 14px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.real {
+  color: var(--red) !important;
+  font-weight: 700;
+}
+
+.digits {
+  flex: 1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.bars {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.install-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 0;
+}
+
+.acct-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.seg-btn {
+  min-height: 36px;
+  padding: 7px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #0b1220;
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.seg-btn.on {
+  background: var(--green);
+  color: #06140f;
+  border-color: var(--green);
+}
+
+.seg-btn.real.on {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+}
+
+.seg-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
 
 /* ADEE additions */
-.badge{display:inline-flex;padding:5px 9px;border-radius:20px;font-size:11px;font-weight:800;background:#26344b;color:#d6e2f7}
-.badge.good{background:#123b32;color:#20d99a}.badge.warn{background:#453719;color:#ffc857}.badge.bad{background:#451e2a;color:#ff8095}
-.metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:16px 0}
-.metric{background:#0b1220;border:1px solid var(--border);border-radius:10px;padding:13px}.metric span{display:block;color:var(--muted);font-size:11px}.metric strong{display:block;font-size:20px;margin-top:5px;overflow-wrap:anywhere}
-.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:10px 9px;border-bottom:1px solid var(--border);text-align:left;font-size:12px;white-space:nowrap}th{color:var(--muted);font-weight:700}
-.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{display:flex;flex-direction:row;align-items:center;gap:7px;padding:8px 10px;background:#0b1220;border:1px solid var(--border);border-radius:8px}.chip input{width:auto;min-height:0}
-.button-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.checkbox-row{display:flex;flex-direction:row;align-items:center;margin-top:12px}.checkbox-row input{width:auto;min-height:0}
-.btn{border:0;border-radius:8px;padding:11px 16px;font-weight:800;cursor:pointer}.btn:disabled{opacity:.45;cursor:not-allowed}.btn.primary{background:var(--green);color:#062016}.btn.secondary{background:#26344b;color:var(--text)}.btn.warning{background:#62431b;color:#ffe1a3}
-.account-switch{display:flex;align-items:center;gap:8px;margin:14px 0}.seg-btn{background:#0b1220;color:var(--text);border:1px solid var(--border);padding:8px 14px;border-radius:8px}.seg-btn.active{border-color:var(--green);color:var(--green)}
-.balance-box{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px;background:#0b1220;border-radius:9px;margin-top:14px}.balance-box strong{font-size:19px}
-.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.market-row{display:grid;grid-template-columns:1.3fr repeat(6,minmax(70px,1fr));gap:8px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px;align-items:center}.market-row.head{color:var(--muted);font-weight:800}.market-row .symbol{font-weight:800}.market-row .sub{color:var(--muted);font-size:10px}.positive{color:var(--green)}.negative{color:var(--red)}
-@media(max-width:650px){.app{padding:14px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.market-row{grid-template-columns:1.3fr repeat(3,minmax(55px,1fr));}.market-row .hide-mobile{display:none}.form-grid{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}}
-</style></head>
+.badge {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  background: #26344b;
+  color: #d6e2f7;
+}
+
+.badge.good {
+  background: #123b32;
+  color: #20d99a;
+}
+
+.badge.warn {
+  background: #453719;
+  color: #ffc857;
+}
+
+.badge.bad {
+  background: #451e2a;
+  color: #ff8095;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.metric {
+  background: #0b1220;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px;
+}
+
+.metric span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.metric strong {
+  display: block;
+  font-size: 20px;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+
+.table-wrap {
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+th,
+td {
+  padding: 10px 9px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  background: #0b1220;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.chip input {
+  width: auto;
+  min-height: 0;
+}
+
+.button-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.checkbox-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.checkbox-row input {
+  width: auto;
+  min-height: 0;
+}
+
+.btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.btn.primary {
+  background: var(--green);
+  color: #062016;
+}
+
+.btn.secondary {
+  background: #26344b;
+  color: var(--text);
+}
+
+.btn.warning {
+  background: #62431b;
+  color: #ffe1a3;
+}
+
+.account-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.seg-btn {
+  background: #0b1220;
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+
+.seg-btn.active {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.balance-box {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 12px;
+  background: #0b1220;
+  border-radius: 9px;
+  margin-top: 14px;
+}
+
+.balance-box strong {
+  font-size: 19px;
+}
+
+.form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.market-row {
+  display: grid;
+  grid-template-columns: 1.3fr repeat(6, minmax(70px, 1fr));
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  align-items: center;
+}
+
+.market-row.head {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.market-row .symbol {
+  font-weight: 800;
+}
+
+.market-row .sub {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.positive {
+  color: var(--green);
+}
+
+.negative {
+  color: var(--red);
+}
+
+@media (max-width: 650px) {
+  .app {
+    padding: 14px;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .market-row {
+    grid-template-columns: 1.3fr repeat(3, minmax(55px, 1fr));
+  }
+
+  .market-row .hide-mobile {
+    display: none;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+</style>
+</head>
 <body>
-<div class="app">
-<header class="topbar"><div><h1>DERIV <span>ADEE DIFFERS</span></h1><p>Adaptive Digit Exclusion Engine · one-tick Digit Differs</p></div><div id="status" class="status disconnected"><span class="status-dot"></span> Disconnected</div></header>
-<main>
-<div id="message" class="message">Connect your Deriv account to load live quotes and begin paper validation.</div><div id="lastError" class="message error" hidden></div>
-<section class="panel"><div class="section-heading"><h3>Account connection</h3><span class="small">Existing Deriv REST + WebSocket session</span></div>
-<div class="form-grid"><label>API Token<input id="apiToken" type="password" placeholder="Paste Deriv API token" autocomplete="off"></label><label>App ID<input id="appId" type="text" inputmode="numeric" placeholder="Deriv App ID" autocomplete="off"></label><label>Account<select id="account"><option value="">Connect to load accounts</option></select></label><label>&nbsp;<button id="connectBtn" class="btn secondary" type="button">Connect Account</button></label></div>
-<div class="account-switch"><span class="small">Switch account:</span><button id="segDemo" class="seg-btn" type="button" disabled>DEMO</button><button id="segReal" class="seg-btn real" type="button" disabled>REAL</button></div><p id="switchHint" class="small"></p>
-<div class="install-row"><button id="installBtn" class="btn secondary" type="button" hidden>Install app</button><span id="installHint" class="small" hidden></span></div>
-<div class="balance-box"><span>Balance</span><strong id="balance">—</strong><span id="currency">Not connected</span><span id="accountType" class="badge">Not connected</span></div></section>
-<section class="panel"><div class="section-heading"><h3>Market scanner</h3><span class="small">Independent model state per index</span></div><div id="marketList" class="chips"></div>
-<div class="form-grid" style="margin-top:16px"><label>Short window<input id="shortWindow" type="number" min="50" max="500" value="100"></label><label>Medium window<input id="mediumWindow" type="number" min="200" max="1500" value="500"></label><label>Baseline window<input id="longWindow" type="number" min="500" max="5000" value="2000"></label><label>Minimum EV margin (USD)<input id="evMargin" type="number" min="0" step="0.001" value="0.01"></label></div>
-<p class="small">The windows are candidate settings, not proven optimal parameters. Digit extraction uses each market's reported quote precision.</p></section>
-<section class="metrics"><div class="metric"><span>ENGINE</span><strong id="engineStatus">STOPPED</strong></div><div class="metric"><span>LAST SELECTED BARRIER</span><strong id="lastBarrier">—</strong></div><div class="metric"><span>PAPER SAMPLES</span><strong id="paperSamples">0</strong></div><div class="metric"><span>LIVE NET P/L</span><strong id="sessionPL">$0.00</strong></div><div class="metric"><span>PAPER NET P/L</span><strong id="paperPL">$0.00</strong></div></section>
-<section class="panel"><div class="section-heading"><h3>Statistical market intelligence</h3><span class="small">Live model estimates; not guarantees</span></div><div class="table-wrap"><div class="market-row head"><span>Market</span><span>Ticks</span><span>Last digit</span><span>Barrier</span><span class="hide-mobile">P(win) LCB</span><span class="hide-mobile">Stability</span><span class="hide-mobile">Paper gate</span></div><div id="watch"></div></div></section>
-<section class="panel"><div class="section-heading"><h3>Execution & risk controls</h3><span id="modeBadge" class="badge warn">PAPER VALIDATION</span></div>
-<div class="form-grid"><label>Stake per contract<input id="stake" type="number" min="0.35" step="0.01" value="0.35"></label><label>Daily/session stop loss<input id="stopLoss" type="number" min="0.35" step="0.01" value="3.00"></label><label>Take-profit stop<input id="takeProfit" type="number" min="0.35" step="0.01" value="2.00"></label><label>Minimum paper samples per market<input id="minPaper" type="number" min="100" max="5000" step="50" value="250"></label></div>
-<label class="checkbox-row"><input id="mgEnabled" type="checkbox"><span>Enable Martingale on LIVE and PAPER trades (stake multiplies after each loss, resets after a win)</span></label>
-<div class="form-grid" id="mgFields"><label>Martingale multiplier<input id="mgMult" type="number" min="1.1" max="20" step="0.1" value="11"></label><label>Max consecutive steps<input id="mgSteps" type="number" min="1" max="10" step="1" value="2"></label></div>
-<p id="mgInfo" class="small">Martingale: disabled.</p>
-<label class="checkbox-row"><input id="autoBuy" type="checkbox"><span>Enable automatic buying only after a market passes its out-of-sample paper gate</span></label><label class="checkbox-row"><input id="allowReal" type="checkbox"><span>Explicitly authorize automatic trading on a REAL account (leave off for DEMO)</span></label>
-<div class="button-row"><button id="startBtn" class="btn primary" type="button" disabled>Start ADEE</button><button id="stopBtn" class="btn warning" type="button" disabled>Stop Engine</button><button id="resetPaperBtn" class="btn secondary" type="button">Reset paper validation</button></div>
-<p class="small">Martingale is optional (off by default). When enabled, it scales both LIVE and PAPER stakes so paper results reflect the staked strategy. Each mode maintains its own cycle and is budgeted against its own session P/L. No forced entries. Only markets with 4/4 window agreement are traded. The bot first requests a live proposal, records its actual payout, and observes the next tick in paper mode. Automatic buying remains blocked for each market until its paper results show a positive 95% lower confidence bound on mean net return. A positive historical result still does not guarantee future profitability.</p></section>
-<section class="panel"><div class="section-heading"><h3>Trade & paper audit</h3><button id="clearHistoryBtn" class="btn secondary" type="button">Clear log</button></div><div class="table-wrap"><table><thead><tr><th>Time</th><th>Market</th><th>Mode</th><th>Barrier</th><th>Outcome</th><th>Quoted payout</th><th>Net P/L</th><th>Validation</th></tr></thead><tbody id="tradeHistory"></tbody></table></div></section>
-</main><footer><p>ADEE Digit Differs · 1 tick · No guaranteed edge · Demo testing strongly recommended.</p></footer></div>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <h1>DERIV <span>ADEE DIFFERS</span></h1>
+        <p>Adaptive Digit Exclusion Engine · one-tick Digit Differs</p>
+      </div>
+      <div id="status" class="status disconnected"><span class="status-dot"></span> Disconnected</div>
+    </header>
+
+    <main>
+      <div id="message" class="message">Connect your Deriv account to load live quotes and begin paper validation.</div>
+      <div id="lastError" class="message error" hidden></div>
+
+      <section class="panel">
+        <div class="section-heading"><h3>Account connection</h3><span class="small">Existing Deriv REST + WebSocket session</span></div>
+        <div class="form-grid">
+          <label>API Token<input id="apiToken" type="password" placeholder="Paste Deriv API token" autocomplete="off"></label>
+          <label>App ID<input id="appId" type="text" inputmode="numeric" placeholder="Deriv App ID" autocomplete="off"></label>
+          <label>Account<select id="account"><option value="">Connect to load accounts</option></select></label>
+          <label>&nbsp;<button id="connectBtn" class="btn secondary" type="button">Connect Account</button></label>
+        </div>
+        <div class="account-switch">
+          <span class="small">Switch account:</span>
+          <button id="segDemo" class="seg-btn" type="button" disabled>DEMO</button>
+          <button id="segReal" class="seg-btn real" type="button" disabled>REAL</button>
+        </div>
+        <p id="switchHint" class="small"></p>
+        <div class="install-row"><button id="installBtn" class="btn secondary" type="button" hidden>Install app</button><span id="installHint" class="small" hidden></span></div>
+        <div class="balance-box">
+          <span>Balance</span><strong id="balance">—</strong><span id="currency">Not connected</span><span id="accountType" class="badge">Not connected</span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading"><h3>Market scanner</h3><span class="small">Independent model state per index</span></div>
+        <div id="marketList" class="chips"></div>
+        <div class="form-grid" style="margin-top:16px">
+          <label>Short window<input id="shortWindow" type="number" min="50" max="500" value="100"></label>
+          <label>Medium window<input id="mediumWindow" type="number" min="200" max="1500" value="500"></label>
+          <label>Baseline window<input id="longWindow" type="number" min="500" max="5000" value="2000"></label>
+          <label>Minimum EV margin (USD)<input id="evMargin" type="number" min="0" step="0.001" value="0.01"></label>
+        </div>
+        <p class="small">The windows are candidate settings, not proven optimal parameters. Digit extraction uses each market's reported quote precision.</p>
+      </section>
+
+      <section class="metrics">
+        <div class="metric"><span>ENGINE</span><strong id="engineStatus">STOPPED</strong></div>
+        <div class="metric"><span>LAST SELECTED BARRIER</span><strong id="lastBarrier">—</strong></div>
+        <div class="metric"><span>PAPER SAMPLES</span><strong id="paperSamples">0</strong></div>
+        <div class="metric"><span>LIVE NET P/L</span><strong id="sessionPL">$0.00</strong></div>
+        <div class="metric"><span>PAPER NET P/L</span><strong id="paperPL">$0.00</strong></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading"><h3>Statistical market intelligence</h3><span class="small">Live model estimates; not guarantees</span></div>
+        <div class="table-wrap">
+          <div class="market-row head">
+            <span>Market</span><span>Ticks</span><span>Last digit</span><span>Barrier</span>
+            <span class="hide-mobile">P(win) LCB</span><span class="hide-mobile">Stability</span><span class="hide-mobile">Paper gate</span>
+          </div>
+          <div id="watch"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading"><h3>Execution &amp; risk controls</h3><span id="modeBadge" class="badge warn">PAPER VALIDATION</span></div>
+        <div class="form-grid">
+          <label>Stake per contract<input id="stake" type="number" min="0.35" step="0.01" value="0.35"></label>
+          <label>Daily/session stop loss<input id="stopLoss" type="number" min="0.35" step="0.01" value="3.00"></label>
+          <label>Take-profit stop<input id="takeProfit" type="number" min="0.35" step="0.01" value="2.00"></label>
+          <label>Minimum paper samples per market<input id="minPaper" type="number" min="100" max="5000" step="50" value="250"></label>
+        </div>
+        <label class="checkbox-row"><input id="mgEnabled" type="checkbox"><span>Enable Martingale on LIVE and PAPER trades (stake multiplies after each loss, resets after a win)</span></label>
+        <div class="form-grid" id="mgFields">
+          <label>Martingale multiplier<input id="mgMult" type="number" min="1.1" max="20" step="0.1" value="11"></label>
+          <label>Max consecutive steps<input id="mgSteps" type="number" min="1" max="10" step="1" value="2"></label>
+        </div>
+        <p id="mgInfo" class="small">Martingale: disabled.</p>
+        <label class="checkbox-row"><input id="autoBuy" type="checkbox"><span>Enable automatic buying only after a market passes its out-of-sample paper gate</span></label>
+        <label class="checkbox-row"><input id="allowReal" type="checkbox"><span>Explicitly authorize automatic trading on a REAL account (leave off for DEMO)</span></label>
+        <div class="button-row">
+          <button id="startBtn" class="btn primary" type="button" disabled>Start ADEE</button>
+          <button id="stopBtn" class="btn warning" type="button" disabled>Stop Engine</button>
+          <button id="resetPaperBtn" class="btn secondary" type="button">Reset paper validation</button>
+        </div>
+        <p class="small">Martingale is optional (off by default). When enabled, it scales both LIVE and PAPER stakes so paper results reflect the staked strategy. Each mode maintains its own cycle and is budgeted against its own session P/L. No forced entries. Only markets with 4/4 window agreement are traded. The bot first requests a live proposal, records its actual payout, and observes the next tick in paper mode. Automatic buying remains blocked for each market until its paper results show a positive 95% lower confidence bound on mean net return. A positive historical result still does not guarantee future profitability.</p>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading"><h3>Trade &amp; paper audit</h3><button id="clearHistoryBtn" class="btn secondary" type="button">Clear log</button></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Time</th><th>Market</th><th>Mode</th><th>Barrier</th><th>Outcome</th><th>Quoted payout</th><th>Net P/L</th><th>Validation</th></tr></thead>
+          <tbody id="tradeHistory"></tbody>
+        </table></div>
+      </section>
+    </main>
+
+    <footer><p>ADEE Digit Differs · 1 tick · No guaranteed edge · Demo testing strongly recommended.</p></footer>
+  </div>
 <script>
 "use strict";
-const $=id=>document.getElementById(id);
-const REST_BASE="https://api.derivws.com", WS_PUBLIC="wss://api.derivws.com/trading/v1/options/ws/public";
-let MARKETS=[["R_10","Volatility 10"],["R_25","Volatility 25"],["R_50","Volatility 50"],["R_75","Volatility 75"],["R_100","Volatility 100"],["1HZ10V","Volatility 10 (1s)"],["1HZ15V","Volatility 15 (1s)"],["1HZ25V","Volatility 25 (1s)"],["1HZ30V","Volatility 30 (1s)"],["1HZ50V","Volatility 50 (1s)"],["1HZ75V","Volatility 75 (1s)"],["1HZ90V","Volatility 90 (1s)"],["1HZ100V","Volatility 100 (1s)"]];
-const state={pub:null,pubReady:false,tradeSocket:null,tradingReady:false,accounts:[],account:null,token:"",appId:"",creds:{},selected:MARKETS.map(x=>x[0]),mk:{},histReq:new Map(),running:false,reqSeq:0,pendingProposals:new Map(),byContract:new Map(),history:[],liveProfit:0,paperProfit:0,balance:null,currency:"USD",reconnectTimer:null,reconnectCount:0,connecting:false,lastAnyTick:0,publicRetry:0,publicTimer:null,quoteBusy:false,lastGlobalQuote:0,realConfirmed:false,mgLevelLive:0,mgLevelPaper:0};
-const now=()=>Date.now(), round=(n)=>Math.round((n+Number.EPSILON)*100)/100;
-function showMessage(s,type=""){const el=$("message");el.textContent=s;el.className="message"+(type?" "+type:"");}
-function showError(s){const el=$("lastError");el.hidden=false;el.textContent=s;}
-function clearError(){$("lastError").hidden=true;}
-function setStatus(on){state.pubReady=on;const e=$("status");e.className=on?"status connected":"status disconnected";e.lastChild.textContent=on?" Connected":" Disconnected";}
-function money(v){try{return new Intl.NumberFormat("en-US",{style:"currency",currency:state.currency||"USD"}).format(v)}catch{return Number(v).toFixed(2)+" "+state.currency}}
-function send(ws,obj){if(!ws||ws.readyState!==WebSocket.OPEN)return false;ws.send(JSON.stringify(obj));return true;}
-function mk(sym){if(!state.mk[sym])state.mk[sym]={prices:[],digits:[],pipSize:null,lastEpoch:0,lastDigit:null,seq:0,histReady:false,historyRaw:[],paperPending:null,paper:[],lastQuoteAt:0,model:null};return state.mk[sym];}
-function quoteDigit(q,pip){let n=Number(q);if(!Number.isFinite(n)||!Number.isInteger(pip)||pip<0||pip>10)return null;return Number(n.toFixed(pip).replace(".","").slice(-1));}
-function setPip(m,p){if(Number.isInteger(Number(p))&&Number(p)>=0&&Number(p)<=10){const next=Number(p);if(m.pipSize===next)return;m.pipSize=next;if(m.historyRaw.length){m.digits=m.historyRaw.map(q=>quoteDigit(q,m.pipSize)).filter(x=>x!==null);}}}
-function readWindows(){const s=Math.max(50,Math.min(500,Number($("shortWindow").value)||100)),m=Math.max(200,Math.min(1500,Number($("mediumWindow").value)||500)),l=Math.max(500,Math.min(5000,Number($("longWindow").value)||2000));return [s,m,l].sort((a,b)=>a-b);}
-function addTick(sym,tick){if(!state.selected.includes(sym))return;const m=mk(sym);const ep=Number(tick.epoch);if(Number.isFinite(ep)&&ep<=m.lastEpoch)return;if(Number.isFinite(ep))m.lastEpoch=ep;if(tick.pip_size!==undefined)setPip(m,tick.pip_size);const q=tick.quote,d=quoteDigit(q,m.pipSize);if(d===null)return;m.prices.push(Number(q));m.digits.push(d);const keep=Math.max(5000,readWindows()[2]+50);if(m.digits.length>keep){m.digits.shift();m.prices.shift();}m.lastDigit=d;m.seq++;state.lastAnyTick=now();if(m.paperPending&&m.seq>m.paperPending.entrySeq){resolvePaper(sym,m,m.paperPending,d);m.paperPending=null;}if(state.running)maybeQuote(sym);scheduleRender();}
-function ingestHistory(sym,data){const m=mk(sym);const h=data.history||{};if(data.pip_size!==undefined)setPip(m,data.pip_size);else if(h.pip_size!==undefined)setPip(m,h.pip_size);m.historyRaw=(h.prices||[]).map(Number).filter(Number.isFinite);const times=h.times||[];m.lastEpoch=Math.max(m.lastEpoch,Number(times[times.length-1])||0);m.prices=m.historyRaw.slice(-5000);m.digits=m.prices.map(q=>quoteDigit(q,m.pipSize)).filter(x=>x!==null);m.histReady=true;scheduleRender();}
-function countDigits(arr){const c=Array(10).fill(0);arr.forEach(x=>{if(Number.isInteger(x)&&x>=0&&x<=9)c[x]++;});return c;}
-function probsFrom(arr){const c=countDigits(arr),n=arr.length;return c.map(x=>(x+1)/(n+10));}
-function wilsonUpper(successes,total,z=2.807){
-  if(!total)return 1;
-  const p=successes/total,z2=z*z,den=1+z2/total;
-  const center=p+z2/(2*total),spread=z*Math.sqrt((p*(1-p)+z2/(4*total))/total);
-  return Math.min(1,(center+spread)/den);
+
+/*
+ * DERIV ADEE DIGIT DIFFERS BOT - Adaptive Digit Exclusion Engine, multi-market
+ *
+ * Every selected market is modelled tick by tick over short, medium and baseline
+ * windows plus a last-digit transition model. The digit with the lowest conservative
+ * (Wilson upper-bound) risk becomes the Differs barrier, and a setup is only used
+ * when all 4 risk vectors agree (4/4 stability).
+ * Each setup first requests a live proposal and is paper-validated on the next tick.
+ * Automatic buying stays blocked per market until its paper results pass the gate.
+ * Optional Martingale (off by default) runs separate cycles for LIVE and PAPER.
+ * Token stays in memory only. Use a DEMO account first.
+ */
+
+/* ---------- constants ---------- */
+const $ = id => document.getElementById(id);
+const REST_BASE = "https://api.derivws.com";
+const WS_PUBLIC = "wss://api.derivws.com/trading/v1/options/ws/public";
+let MARKETS = [
+  ["R_10", "Volatility 10"], ["R_25", "Volatility 25"], ["R_50", "Volatility 50"],
+  ["R_75", "Volatility 75"], ["R_100", "Volatility 100"],
+  ["1HZ10V", "Volatility 10 (1s)"], ["1HZ15V", "Volatility 15 (1s)"],
+  ["1HZ25V", "Volatility 25 (1s)"], ["1HZ30V", "Volatility 30 (1s)"],
+  ["1HZ50V", "Volatility 50 (1s)"], ["1HZ75V", "Volatility 75 (1s)"],
+  ["1HZ90V", "Volatility 90 (1s)"], ["1HZ100V", "Volatility 100 (1s)"]
+];
+let NAME = Object.fromEntries(MARKETS);
+
+/* ---------- state ---------- */
+const state = {
+  pub: null,
+  pubReady: false,
+  tradeSocket: null,
+  tradingReady: false,
+  accounts: [],
+  account: null,
+  token: "",
+  appId: "",
+  creds: {},
+  selected: MARKETS.map(x => x[0]),
+  mk: {},
+  histReq: new Map(),
+  running: false,
+  reqSeq: 0,
+  pendingProposals: new Map(),
+  byContract: new Map(),
+  history: [],
+  liveProfit: 0,
+  paperProfit: 0,
+  balance: null,
+  currency: "USD",
+  reconnectTimer: null,
+  reconnectCount: 0,
+  connecting: false,
+  lastAnyTick: 0,
+  publicRetry: 0,
+  publicTimer: null,
+  quoteBusy: false,
+  lastGlobalQuote: 0,
+  realConfirmed: false,
+  mgLevelLive: 0,
+  mgLevelPaper: 0
+};
+
+/* ---------- helpers & messages ---------- */
+const now = () => Date.now();
+const round = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
+function showMessage(s, type = "") {
+  const el = $("message");
+  el.textContent = s;
+  el.className = "message" + (type ? " " + type : "");
 }
-function rankOf(values,index){return 1+values.filter(v=>v<values[index]).length;}
-function modelFor(sym){
-  const m=mk(sym),ds=m.digits,[sw,mw,lw]=readWindows();
-  if(ds.length<Math.max(lw,sw+20))return null;
-  const short=ds.slice(-sw),med=ds.slice(-mw),long=ds.slice(-lw);
-  const cs=countDigits(short),cm=countDigits(med),cl=countDigits(long);
-  const ps=probsFrom(short),pm=probsFrom(med),pl=probsFrom(long);
-  const trans=Array.from({length:10},()=>Array(10).fill(0));
-  for(let i=Math.max(0,ds.length-lw);i<ds.length-1;i++)trans[ds[i]][ds[i+1]]++;
-  const prev=ds[ds.length-1],row=trans[prev],rowN=row.reduce((a,b)=>a+b,0);
-  const prior=pl;
-  const cond=row.map((v,i)=>(v+prior[i]*20)/(rowN+20));
+function showError(s) {
+  const el = $("lastError");
+  el.hidden = false;
+  el.textContent = s;
+}
+function clearError() {
+  $("lastError").hidden = true;
+}
+function setStatus(on) {
+  state.pubReady = on;
+  const e = $("status");
+  e.className = on ? "status connected" : "status disconnected";
+  e.lastChild.textContent = on ? " Connected" : " Disconnected";
+}
+function money(v) {
+  try {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: state.currency || "USD" }).format(v);
+  } catch {
+    return Number(v).toFixed(2) + " " + state.currency;
+  }
+}
+function send(ws, obj) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    return false;
+  }
+  ws.send(JSON.stringify(obj));
+  return true;
+}
+
+/* ---------- market data (ticks, digits, history) ---------- */
+function mk(sym) {
+  if (!state.mk[sym]) {
+    state.mk[sym] = {
+      prices: [],
+      digits: [],
+      pipSize: null,
+      lastEpoch: 0,
+      lastDigit: null,
+      seq: 0,
+      histReady: false,
+      historyRaw: [],
+      paperPending: null,
+      paper: [],
+      lastQuoteAt: 0,
+      model: null
+    };
+  }
+  return state.mk[sym];
+}
+function quoteDigit(q, pip) {
+  let n = Number(q);
+  if (!Number.isFinite(n) || !Number.isInteger(pip) || pip < 0 || pip > 10) {
+    return null;
+  }
+  return Number(n.toFixed(pip).replace(".", "").slice(-1));
+}
+function setPip(m, p) {
+  if (Number.isInteger(Number(p)) && Number(p) >= 0 && Number(p) <= 10) {
+    const next = Number(p);
+    if (m.pipSize === next) {
+      return;
+    }
+    m.pipSize = next;
+    if (m.historyRaw.length) {
+      m.digits = m.historyRaw.map(q => quoteDigit(q, m.pipSize)).filter(x => x !== null);
+    }
+  }
+}
+function readWindows() {
+  const s = Math.max(50, Math.min(500, Number($("shortWindow").value) || 100));
+  const m = Math.max(200, Math.min(1500, Number($("mediumWindow").value) || 500));
+  const l = Math.max(500, Math.min(5000, Number($("longWindow").value) || 2000));
+  return [s, m, l].sort((a, b) => a - b);
+}
+function addTick(sym, tick) {
+  if (!state.selected.includes(sym)) {
+    return;
+  }
+  const m = mk(sym);
+  const ep = Number(tick.epoch);
+  if (Number.isFinite(ep) && ep <= m.lastEpoch) {
+    return;
+  }
+  if (Number.isFinite(ep)) {
+    m.lastEpoch = ep;
+  }
+  if (tick.pip_size !== undefined) {
+    setPip(m, tick.pip_size);
+  }
+  const q = tick.quote, d = quoteDigit(q, m.pipSize);
+  if (d === null) {
+    return;
+  }
+  m.prices.push(Number(q));
+  m.digits.push(d);
+  const keep = Math.max(5000, readWindows()[2] + 50);
+  if (m.digits.length > keep) {
+    m.digits.shift();
+    m.prices.shift();
+  }
+  m.lastDigit = d;
+  m.seq++;
+  state.lastAnyTick = now();
+  if (m.paperPending && m.seq > m.paperPending.entrySeq) {
+    resolvePaper(sym, m, m.paperPending, d);
+    m.paperPending = null;
+  }
+  if (state.running) {
+    maybeQuote(sym);
+  }
+  scheduleRender();
+}
+function ingestHistory(sym, data) {
+  const m = mk(sym);
+  const h = data.history || {};
+  if (data.pip_size !== undefined) {
+    setPip(m, data.pip_size);
+  } else if (h.pip_size !== undefined) {
+    setPip(m, h.pip_size);
+  }
+  m.historyRaw = (h.prices || []).map(Number).filter(Number.isFinite);
+  const times = h.times || [];
+  m.lastEpoch = Math.max(m.lastEpoch, Number(times[times.length - 1]) || 0);
+  m.prices = m.historyRaw.slice(-5000);
+  m.digits = m.prices.map(q => quoteDigit(q, m.pipSize)).filter(x => x !== null);
+  m.histReady = true;
+  scheduleRender();
+}
+
+/* ---------- statistical model ---------- */
+function countDigits(arr) {
+  const c = Array(10).fill(0);
+  arr.forEach(x => {
+    if (Number.isInteger(x) && x >= 0 && x <= 9) {
+      c[x]++;
+    }
+  });
+  return c;
+}
+function probsFrom(arr) {
+  const c = countDigits(arr), n = arr.length;
+  return c.map(x => (x + 1) / (n + 10));
+}
+function wilsonUpper(successes, total, z = 2.807) {
+  if (!total) {
+    return 1;
+  }
+  const p = successes / total, z2 = z * z, den = 1 + z2 / total;
+  const center = p + z2 / (2 * total);
+  const spread = z * Math.sqrt((p * (1 - p) + z2 / (4 * total)) / total);
+  return Math.min(1, (center + spread) / den);
+}
+function rankOf(values, index) {
+  return 1 + values.filter(v => v < values[index]).length;
+}
+function modelFor(sym) {
+  const m = mk(sym), ds = m.digits, [sw, mw, lw] = readWindows();
+  if (ds.length < Math.max(lw, sw + 20)) {
+    return null;
+  }
+  const short = ds.slice(-sw), med = ds.slice(-mw), long = ds.slice(-lw);
+  const cs = countDigits(short), cm = countDigits(med), cl = countDigits(long);
+  const ps = probsFrom(short), pm = probsFrom(med), pl = probsFrom(long);
+  const trans = Array.from({ length: 10 }, () => Array(10).fill(0));
+  for (let i = Math.max(0, ds.length - lw); i < ds.length - 1; i++) {
+    trans[ds[i]][ds[i + 1]]++;
+  }
+  const prev = ds[ds.length - 1], row = trans[prev], rowN = row.reduce((a, b) => a + b, 0);
+  const prior = pl;
+  const cond = row.map((v, i) => (v + prior[i] * 20) / (rowN + 20));
   // Conservative per-window upper bounds for the probability of each excluded digit.
-  const upperS=cs.map(v=>wilsonUpper(v,short.length));
-  const upperM=cm.map(v=>wilsonUpper(v,med.length));
-  const upperL=cl.map(v=>wilsonUpper(v,long.length));
-  const upperC=row.map((v,i)=>rowN>=20?wilsonUpper(v,rowN):Math.min(1,prior[i]+0.10));
-  const risk=upperS.map((v,i)=>Math.max(v,upperM[i],upperL[i],upperC[i]));
-  const ranks=[upperS,upperM,upperL,upperC].map(a=>a.map((_,i)=>rankOf(a,i)));
-  let best=0;
-  for(let i=1;i<10;i++)if(risk[i]<risk[best])best=i;
-  const agreement=ranks.filter(r=>r[best]<=3).length;
-  const stable=agreement===4;
-  const pDigit=Math.max(0,Math.min(1,(ps[best]+pm[best]+pl[best]+cond[best])/4));
-  const pWin=1-pDigit;
-  const pWinLCB=Math.max(0,1-risk[best]);
-  return {barrier:best,pWin,pWinLCB,pDigit,risk:risk[best],agreement,stable,n:ds.length,rowN,base:pl,pred:pl.map((v,i)=>(ps[i]+pm[i]+pl[i]+cond[i])/4),short:cs,medium:cm,long:cl,reason:stable?"Stable 4/4":"Needs 4/4 agreement"};
+  const upperS = cs.map(v => wilsonUpper(v, short.length));
+  const upperM = cm.map(v => wilsonUpper(v, med.length));
+  const upperL = cl.map(v => wilsonUpper(v, long.length));
+  const upperC = row.map((v, i) => rowN >= 20 ? wilsonUpper(v, rowN) : Math.min(1, prior[i] + 0.10));
+  const risk = upperS.map((v, i) => Math.max(v, upperM[i], upperL[i], upperC[i]));
+  const ranks = [upperS, upperM, upperL, upperC].map(a => a.map((_, i) => rankOf(a, i)));
+  let best = 0;
+  for (let i = 1; i < 10; i++) {
+    if (risk[i] < risk[best]) {
+      best = i;
+    }
+  }
+  const agreement = ranks.filter(r => r[best] <= 3).length;
+  const stable = agreement === 4;
+  const pDigit = Math.max(0, Math.min(1, (ps[best] + pm[best] + pl[best] + cond[best]) / 4));
+  const pWin = 1 - pDigit;
+  const pWinLCB = Math.max(0, 1 - risk[best]);
+  return {
+    barrier: best,
+    pWin,
+    pWinLCB,
+    pDigit,
+    risk: risk[best],
+    agreement,
+    stable,
+    n: ds.length,
+    rowN,
+    base: pl,
+    pred: pl.map((v, i) => (ps[i] + pm[i] + pl[i] + cond[i]) / 4),
+    short: cs,
+    medium: cm,
+    long: cl,
+    reason: stable ? "Stable 4/4" : "Needs 4/4 agreement"
+  };
 }
-function paperStats(m){const a=m.paper,n=a.length;if(!n)return {n:0,mean:0,lcb:-Infinity,winRate:0};const vals=a.map(x=>x.pnl),mean=vals.reduce((x,y)=>x+y,0)/n;const centered=vals.map(x=>x-mean);const gamma0=centered.reduce((x,y)=>x+y*y,0)/n;const lag=Math.min(10,Math.floor(Math.pow(n,1/3)));let longRun=gamma0;for(let k=1;k<=lag;k++){let cov=0;for(let i=k;i<n;i++)cov+=centered[i]*centered[i-k];cov/=n;const weight=1-k/(lag+1);longRun+=2*weight*cov;}const se=Math.sqrt(Math.max(0,longRun)/n);const lcb=mean-1.96*se;return {n,mean,lcb,winRate:a.filter(x=>x.win).length/n};}
-function gatePass(m){const s=paperStats(m),min=Math.max(100,Number($("minPaper").value)||250);return s.n>=min&&s.lcb>0;}
-function stake(){return Math.max(.35,Number($("stake").value)||.35);}
-function mgOn(){return $("mgEnabled").checked;}
-function mgMaxSteps(){return Math.max(1,Math.min(10,Math.floor(Number($("mgSteps").value)||2)));}
-function mgMult(){return Math.max(1.1,Math.min(20,Number($("mgMult").value)||11));}
-function mgKey(mode){return mode==="LIVE"?"mgLevelLive":"mgLevelPaper";}
-function mgPnl(mode){return mode==="LIVE"?state.liveProfit:state.paperProfit;}
-function mgBudget(mode){
-  const sl=Math.max(.35,Number($("stopLoss").value)||3);
-  return Math.max(0,sl+Math.min(0,mgPnl(mode)));
+
+/* ---------- paper validation & staking (incl. optional Martingale) ---------- */
+function paperStats(m) {
+  const a = m.paper, n = a.length;
+  if (!n) {
+    return { n: 0, mean: 0, lcb: -Infinity, winRate: 0 };
+  }
+  const vals = a.map(x => x.pnl), mean = vals.reduce((x, y) => x + y, 0) / n;
+  const centered = vals.map(x => x - mean);
+  const gamma0 = centered.reduce((x, y) => x + y * y, 0) / n;
+  const lag = Math.min(10, Math.floor(Math.pow(n, 1 / 3)));
+  let longRun = gamma0;
+  for (let k = 1; k <= lag; k++) {
+    let cov = 0;
+    for (let i = k; i < n; i++) {
+      cov += centered[i] * centered[i - k];
+    }
+    cov /= n;
+    const weight = 1 - k / (lag + 1);
+    longRun += 2 * weight * cov;
+  }
+  const se = Math.sqrt(Math.max(0, longRun) / n);
+  const lcb = mean - 1.96 * se;
+  return { n, mean, lcb, winRate: a.filter(x => x.win).length / n };
 }
-function computeStake(mode){
-  const base=stake();
-  if(!mgOn())return base;
-  const level=state[mgKey(mode)]||0;
-  if(level<=0)return base;
-  const want=round(base*Math.pow(mgMult(),level));
-  return Math.max(base,Math.min(want,mgBudget(mode)));
+function gatePass(m) {
+  const s = paperStats(m), min = Math.max(100, Number($("minPaper").value) || 250);
+  return s.n >= min && s.lcb > 0;
 }
-function mgUpdate(pnl,mode){
-  if(!mgOn())return;
-  const k=mgKey(mode);
-  if(pnl>0){state[k]=0;return;}
-  state[k]=(state[k]||0)+1;
-  if(state[k]>=mgMaxSteps()){
-    state[k]=0;
-    showMessage(`Martingale ${mode}: ${mgMaxSteps()} consecutive losses reached. Cycle reset.`,"error");
+function stake() {
+  return Math.max(.35, Number($("stake").value) || .35);
+}
+function mgOn() {
+  return $("mgEnabled").checked;
+}
+function mgMaxSteps() {
+  return Math.max(1, Math.min(10, Math.floor(Number($("mgSteps").value) || 2)));
+}
+function mgMult() {
+  return Math.max(1.1, Math.min(20, Number($("mgMult").value) || 11));
+}
+function mgKey(mode) {
+  return mode === "LIVE" ? "mgLevelLive" : "mgLevelPaper";
+}
+function mgPnl(mode) {
+  return mode === "LIVE" ? state.liveProfit : state.paperProfit;
+}
+function mgBudget(mode) {
+  const sl = Math.max(.35, Number($("stopLoss").value) || 3);
+  return Math.max(0, sl + Math.min(0, mgPnl(mode)));
+}
+function computeStake(mode) {
+  const base = stake();
+  if (!mgOn()) {
+    return base;
+  }
+  const level = state[mgKey(mode)] || 0;
+  if (level <= 0) {
+    return base;
+  }
+  const want = round(base * Math.pow(mgMult(), level));
+  return Math.max(base, Math.min(want, mgBudget(mode)));
+}
+function mgUpdate(pnl, mode) {
+  if (!mgOn()) {
+    return;
+  }
+  const k = mgKey(mode);
+  if (pnl > 0) {
+    state[k] = 0;
+    return;
+  }
+  state[k] = (state[k] || 0) + 1;
+  if (state[k] >= mgMaxSteps()) {
+    state[k] = 0;
+    showMessage(`Martingale ${mode}: ${mgMaxSteps()} consecutive losses reached. Cycle reset.`, "error");
   }
 }
-function maybeQuote(sym){
-  const m=mk(sym);
-  if(!state.running||!state.tradingReady||!state.account||m.paperPending||state.pendingProposals.size>0)return;
-  if($("autoBuy").checked&&state.byContract.size>0)return;
-  if(now()-m.lastQuoteAt<2500||now()-state.lastGlobalQuote<700)return;
-  const model=modelFor(sym);
-  if(!model||!model.stable)return;
-  const auto=$("autoBuy").checked,isReal=state.account.account_type==="real";
-  if(isReal&&auto&&(!$("allowReal").checked||!state.realConfirmed))return;
-  const mode=auto&&gatePass(m)?"LIVE":"PAPER",st=computeStake(mode);
-  const req=++state.reqSeq;m.lastQuoteAt=now();state.lastGlobalQuote=now();
-  state.pendingProposals.set(req,{sym,model,stake:st,mode,seq:m.seq,created:now()});
-  if(!send(state.tradeSocket,{proposal:1,amount:st,basis:"stake",contract_type:"DIGITDIFF",currency:state.currency,duration:1,duration_unit:"t",underlying_symbol:sym,barrier:String(model.barrier),req_id:req})){
-    state.pendingProposals.delete(req);showError("Could not send proposal request: trading connection is not open.");
+
+/* ---------- quoting & execution ---------- */
+function maybeQuote(sym) {
+  const m = mk(sym);
+  if (!state.running || !state.tradingReady || !state.account || m.paperPending || state.pendingProposals.size > 0) {
+    return;
+  }
+  if ($("autoBuy").checked && state.byContract.size > 0) {
+    return;
+  }
+  if (now() - m.lastQuoteAt < 2500 || now() - state.lastGlobalQuote < 700) {
+    return;
+  }
+  const model = modelFor(sym);
+  if (!model || !model.stable) {
+    return;
+  }
+  const auto = $("autoBuy").checked, isReal = state.account.account_type === "real";
+  if (isReal && auto && (!$("allowReal").checked || !state.realConfirmed)) {
+    return;
+  }
+  const mode = auto && gatePass(m) ? "LIVE" : "PAPER", st = computeStake(mode);
+  const req = ++state.reqSeq;
+  m.lastQuoteAt = now();
+  state.lastGlobalQuote = now();
+  state.pendingProposals.set(req, { sym, model, stake: st, mode, seq: m.seq, created: now() });
+  if (!send(state.tradeSocket, {
+    proposal: 1,
+    amount: st,
+    basis: "stake",
+    contract_type: "DIGITDIFF",
+    currency: state.currency,
+    duration: 1,
+    duration_unit: "t",
+    underlying_symbol: sym,
+    barrier: String(model.barrier),
+    req_id: req
+  })) {
+    state.pendingProposals.delete(req);
+    showError("Could not send proposal request: trading connection is not open.");
   }
 }
-function resolvePaper(sym,m,p,digit){const win=digit!==p.barrier;const pnl=win?p.payout-p.stake:-p.stake;const sample={time:now(),barrier:p.barrier,win,payout:p.payout,stake:p.stake,pnl,pWin:p.pWin};m.paper.push(sample);if(m.paper.length>5000)m.paper.shift();state.paperProfit=round(state.paperProfit+pnl);mgUpdate(pnl,"PAPER");addLog({time:new Date().toLocaleTimeString(),sym,mode:"PAPER",barrier:p.barrier,outcome:win?"WIN":"LOSS",payout:p.payout,pnl,gate:gatePass(m)?"PASSED":"CALIBRATING"});}
-function handleProposal(d){
-  const req=d.req_id??d.echo_req?.req_id,p=state.pendingProposals.get(req);if(!p)return;
+function resolvePaper(sym, m, p, digit) {
+  const win = digit !== p.barrier;
+  const pnl = win ? p.payout - p.stake : -p.stake;
+  const sample = {
+    time: now(), barrier: p.barrier, win, payout: p.payout, stake: p.stake, pnl, pWin: p.pWin
+  };
+  m.paper.push(sample);
+  if (m.paper.length > 5000) {
+    m.paper.shift();
+  }
+  state.paperProfit = round(state.paperProfit + pnl);
+  mgUpdate(pnl, "PAPER");
+  addLog({
+    time: new Date().toLocaleTimeString(),
+    sym,
+    mode: "PAPER",
+    barrier: p.barrier,
+    outcome: win ? "WIN" : "LOSS",
+    payout: p.payout,
+    pnl,
+    gate: gatePass(m) ? "PASSED" : "CALIBRATING"
+  });
+}
+function handleProposal(d) {
+  const req = d.req_id ?? d.echo_req?.req_id, p = state.pendingProposals.get(req);
+  if (!p) {
+    return;
+  }
   state.pendingProposals.delete(req);
-  if(d.error){showError("Proposal rejected: "+(d.error.message||"unknown error"));return;}
-  const q=d.proposal;if(!q||!q.id)return;
-  const m=mk(p.sym),ask=Number(q.ask_price),payout=Number(q.payout);
-  if(!(ask>0&&payout>0)){showError("Deriv returned an invalid proposal price or payout.");return;}
-  if(!state.running)return;
+  if (d.error) {
+    showError("Proposal rejected: " + (d.error.message || "unknown error"));
+    return;
+  }
+  const q = d.proposal;
+  if (!q || !q.id) {
+    return;
+  }
+  const m = mk(p.sym), ask = Number(q.ask_price), payout = Number(q.payout);
+  if (!(ask > 0 && payout > 0)) {
+    showError("Deriv returned an invalid proposal price or payout.");
+    return;
+  }
+  if (!state.running) {
+    return;
+  }
   // Re-score using the newest tick history. Never arm/buy a stale or changed barrier.
-  const latest=modelFor(p.sym);
-  if(!latest||!latest.stable||latest.barrier!==p.model.barrier){
+  const latest = modelFor(p.sym);
+  if (!latest || !latest.stable || latest.barrier !== p.model.barrier) {
     showMessage(`${NAME[p.sym]} skipped: barrier changed or window agreement weakened before quote confirmation. Waiting for a new setup.`);
     return;
   }
-  const minEV=Math.max(0,Number($("evMargin").value)||0);
-  const ev=latest.pWinLCB*payout-ask;
-  const auto=p.mode==="LIVE"&&gatePass(m)&&ev>minEV;
-  const entry={barrier:latest.barrier,pWin:latest.pWin,pWinLCB:latest.pWinLCB,payout,stake:ask,entrySeq:m.seq,proposalId:q.id,modelSeq:m.seq};
-  if(auto){
-    const bal=state.balance;
-    if(bal!==null&&ask>bal){showMessage("Risk guardian blocked trade: stake exceeds available balance.","error");return;}
-    const buyReq=++state.reqSeq;
-    state.pendingProposals.set(buyReq,{...p,model:latest,seq:m.seq,kind:"BUY",entry,ask});
-    if(!send(state.tradeSocket,{buy:q.id,price:ask,req_id:buyReq}))state.pendingProposals.delete(buyReq);
-  }else{
-    m.paperPending=entry;$("lastBarrier").textContent=String(entry.barrier);
-    showMessage(`${NAME[p.sym]} paper sample armed: barrier ${entry.barrier}; conservative estimated win LCB ${(entry.pWinLCB*100).toFixed(2)}%; window agreement ${latest.agreement}/4; quoted payout ${money(payout)}.`);
+  const minEV = Math.max(0, Number($("evMargin").value) || 0);
+  const ev = latest.pWinLCB * payout - ask;
+  const auto = p.mode === "LIVE" && gatePass(m) && ev > minEV;
+  const entry = {
+    barrier: latest.barrier,
+    pWin: latest.pWin,
+    pWinLCB: latest.pWinLCB,
+    payout,
+    stake: ask,
+    entrySeq: m.seq,
+    proposalId: q.id,
+    modelSeq: m.seq
+  };
+  if (auto) {
+    const bal = state.balance;
+    if (bal !== null && ask > bal) {
+      showMessage("Risk guardian blocked trade: stake exceeds available balance.", "error");
+      return;
+    }
+    const buyReq = ++state.reqSeq;
+    state.pendingProposals.set(buyReq, { ...p, model: latest, seq: m.seq, kind: "BUY", entry, ask });
+    if (!send(state.tradeSocket, { buy: q.id, price: ask, req_id: buyReq })) {
+      state.pendingProposals.delete(buyReq);
+    }
+  } else {
+    m.paperPending = entry;
+    $("lastBarrier").textContent = String(entry.barrier);
+    showMessage(`${NAME[p.sym]} paper sample armed: barrier ${entry.barrier}; conservative estimated win LCB ${(entry.pWinLCB * 100).toFixed(2)}%; window agreement ${latest.agreement}/4; quoted payout ${money(payout)}.`);
   }
 }
-function handleBuy(d){const req=d.req_id??d.echo_req?.req_id,p=state.pendingProposals.get(req);if(!p||p.kind!=="BUY")return;state.pendingProposals.delete(req);if(d.error){showError("Buy rejected: "+(d.error.message||"unknown error"));return;}const b=d.buy;if(!b?.contract_id)return;const trade={contractId:b.contract_id,sym:p.sym,barrier:p.entry.barrier,stake:p.ask,payout:p.entry.payout,entrySeq:p.seq,opened:now(),settled:false};state.byContract.set(b.contract_id,trade);send(state.tradeSocket,{proposal_open_contract:1,contract_id:b.contract_id,subscribe:1});showMessage(`LIVE contract purchased: ${NAME[p.sym]}, DIGITDIFF barrier ${trade.barrier}, 1 tick, stake ${money(trade.stake)}.`,"success");}
-function settleContract(poc){const t=state.byContract.get(poc.contract_id);if(!t||t.settled)return;if(!(poc.is_sold===1||poc.status==="won"||poc.status==="lost"))return;t.settled=true;const pnl=Number.isFinite(Number(poc.profit))?Number(poc.profit):Number(poc.sell_price||0)-Number(poc.buy_price||t.stake);state.liveProfit=round(state.liveProfit+pnl);mgUpdate(pnl,"LIVE");state.byContract.delete(t.contractId);addLog({time:new Date().toLocaleTimeString(),sym:t.sym,mode:"LIVE",barrier:t.barrier,outcome:pnl>0?"WIN":"LOSS",payout:t.payout,pnl,gate:gatePass(mk(t.sym))?"PASSED":"—"});if(poc.balance_after!==undefined)state.balance=Number(poc.balance_after);checkRisk();}
-function addLog(x){state.history.unshift(x);if(state.history.length>300)state.history.pop();renderHistory();render();}
-function checkRisk(){const pl=state.liveProfit,sl=Math.max(.35,Number($("stopLoss").value)||3),tp=Math.max(.35,Number($("takeProfit").value)||2);if(pl<=-sl){stopEngine("Risk guardian: session stop-loss reached.");}else if(pl>=tp){stopEngine("Session take-profit reached. Engine stopped.");}}
-function handleMessage(d){if(d.msg_type==="active_symbols"&&Array.isArray(d.active_symbols)){updateCatalogue(d.active_symbols);return;}if(d.error){const req=d.req_id??d.echo_req?.req_id;if(state.pendingProposals.has(req)){const p=state.pendingProposals.get(req);state.pendingProposals.delete(req);showError((p.kind==="BUY"?"Buy":"Proposal")+" error: "+d.error.message);}else if(state.histReq.has(req)){state.histReq.delete(req);showError("History request failed: "+d.error.message);}else showError(d.error.message||"Deriv API error");return;}if(d.msg_type==="tick"&&d.tick){addTick(d.tick.symbol,d.tick);return;}if(d.msg_type==="history"){const h=state.histReq.get(d.req_id);if(h){state.histReq.delete(d.req_id);ingestHistory(h.sym,d);}return;}if(d.msg_type==="proposal"&&d.proposal){handleProposal(d);return;}if(d.msg_type==="buy"&&d.buy){handleBuy(d);return;}if(d.msg_type==="proposal_open_contract"&&d.proposal_open_contract){const poc=d.proposal_open_contract;settleContract(poc);const done=poc.is_sold===1||poc.status==="won"||poc.status==="lost";if(done&&d.subscription?.id)send(state.tradeSocket,{forget:d.subscription.id});return;}if(d.msg_type==="balance"&&d.balance){state.balance=Number(d.balance.balance);state.currency=d.balance.currency||state.currency;render();}}
-function updateCatalogue(items){const found=items.filter(x=>x&&x.symbol&&(/^(R_\d+|1HZ\d+V)$/.test(x.symbol)||/volatility/i.test(x.display_name||""))).map(x=>[x.symbol,x.display_name||x.symbol]);if(!found.length)return;const old=MARKETS.map(x=>x[0]),wasAll=state.selected.length===old.length;const merged=new Map(MARKETS.map(x=>[x[0],x]));found.forEach(x=>merged.set(x[0],x));MARKETS=[...merged.values()];NAME=Object.fromEntries(MARKETS);state.selected=wasAll?MARKETS.map(x=>x[0]):MARKETS.map(x=>x[0]).filter(s=>state.selected.includes(s));buildMarkets();subscribePublic();render();showMessage(`Discovered ${MARKETS.length} volatility index markets from Deriv.`,"success");}
-function subscribePublic(){if(!state.pub||state.pub.readyState!==WebSocket.OPEN)return;send(state.pub,{forget_all:"ticks"});state.selected.forEach((sym,i)=>send(state.pub,{ticks:sym,subscribe:1,req_id:4000+i}));state.selected.forEach((sym)=>{const m=mk(sym);if(m.histReady)return;const id=++state.reqSeq;state.histReq.set(id,{sym,at:now()});send(state.pub,{ticks_history:sym,end:"latest",count:5000,style:"ticks",req_id:id});});}
-function connectPublic(){clearTimeout(state.publicTimer);const ws=new WebSocket(WS_PUBLIC);state.pub=ws;ws.addEventListener("open",()=>{if(state.pub!==ws)return;state.publicRetry=0;setStatus(true);send(ws,{active_symbols:"brief",req_id:300});subscribePublic();});ws.addEventListener("message",ev=>{if(state.pub!==ws)return;let d;try{d=JSON.parse(ev.data)}catch{return}handleMessage(d);});ws.addEventListener("close",()=>{if(state.pub!==ws)return;state.pub=null;setStatus(false);state.publicRetry++;state.publicTimer=setTimeout(connectPublic,Math.min(10000,1000*state.publicRetry));});ws.addEventListener("error",()=>showError("Public market feed connection error."));}
-const authHeaders=()=>({Authorization:"Bearer "+state.token,"Deriv-App-ID":state.appId});
-async function restFetch(path,opts={}){const res=await fetch(REST_BASE+path,{...opts,headers:{...authHeaders(),...(opts.headers||{})}});let body;try{body=await res.json()}catch{throw new Error("Deriv returned an unreadable response.")}if(!res.ok||body?.errors?.length||body?.error)throw new Error(body?.errors?.[0]?.message||body?.error?.message||body?.message||`HTTP ${res.status}`);return body;}
-function selectedAccount(){return state.accounts.find(a=>a.account_id===$("account").value)||null;}
-function updateSwitch(){const cur=selectedAccount();[ ["segDemo","demo"],["segReal","real"] ].forEach(([id,type])=>{const b=$(id);b.disabled=!state.accounts.some(a=>a.account_type===type);b.classList.toggle("on",!!cur&&cur.account_type===type);});$("switchHint").textContent=cur?`Selected ${cur.account_type.toUpperCase()} account ${cur.account_id}.`:"Connect an account to enable trading.";$("accountType").textContent=cur?cur.account_type.toUpperCase():"Not connected";}
-function populateAccounts(keep){const sel=$("account");sel.innerHTML="";state.accounts.forEach(a=>{const o=document.createElement("option");o.value=a.account_id;o.textContent=`${a.account_type.toUpperCase()} · ${a.account_id} · ${a.currency}`;sel.appendChild(o)});const found=state.accounts.find(a=>a.account_id===keep)||state.accounts.find(a=>a.account_type==="demo")||state.accounts[0];if(found)sel.value=found.account_id;updateSwitch();}
-async function connectAccount(){const token=$("apiToken").value.trim(),appId=$("appId").value.trim();if(!token||!appId){showMessage("Enter both your API token and App ID.","error");return;}if(state.running){showMessage("Stop the engine before changing account.","error");return;}state.token=token;state.appId=appId;$("connectBtn").disabled=true;showMessage("Loading Deriv accounts…");try{const b=await restFetch("/trading/v1/options/accounts");const list=(b.data||[]).filter(a=>a.status!=="inactive");if(!list.length)throw new Error("No active Options accounts were returned for this token.");state.accounts=list;list.forEach(a=>state.creds[a.account_id]={token,appId});populateAccounts(state.account?.account_id);await connectTrading();}catch(e){showMessage(e.message||"Account connection failed.","error");}finally{$("connectBtn").disabled=false;}}
-async function connectTrading(){if(state.connecting)return;state.connecting=true;clearTimeout(state.reconnectTimer);try{const old=state.tradeSocket;state.tradeSocket=null;state.tradingReady=false;if(old){try{old.close()}catch{}}const a=selectedAccount();if(!a)throw new Error("Select an account first.");state.account=a;state.currency=a.currency||"USD";state.balance=Number(a.balance);const b=await restFetch(`/trading/v1/options/accounts/${encodeURIComponent(a.account_id)}/otp`,{method:"POST"});const url=b?.data?.url;if(!url)throw new Error("Deriv did not return a WebSocket OTP URL.");const ws=new WebSocket(url);state.tradeSocket=ws;ws.addEventListener("open",()=>{if(state.tradeSocket!==ws)return;state.tradingReady=true;state.reconnectCount=0;send(ws,{balance:1,subscribe:1,req_id:3001});state.byContract.forEach(t=>send(ws,{proposal_open_contract:1,contract_id:t.contractId,subscribe:1}));render();showMessage(`Connected to ${a.account_type.toUpperCase()} account. Paper quote validation is ready.`,"success");});ws.addEventListener("message",ev=>{if(state.tradeSocket!==ws)return;let d;try{d=JSON.parse(ev.data)}catch{return}handleMessage(d);});ws.addEventListener("close",()=>{if(state.tradeSocket!==ws)return;state.tradeSocket=null;state.tradingReady=false;render();if(state.token){state.reconnectTimer=setTimeout(()=>connectTrading().catch(e=>showMessage("Reconnect failed: "+e.message,"error")),2500);}});ws.addEventListener("error",()=>showError("Authenticated trading session error."));}finally{state.connecting=false;}}
-function switchAccount(type){if(state.running){showMessage("Stop the engine before switching accounts.","error");return;}if(type){const a=state.accounts.find(x=>x.account_type===type);if(a)$("account").value=a.account_id;}const a=selectedAccount();if(!a)return;state.mgLevelLive=0;state.mgLevelPaper=0;connectTrading().catch(e=>showMessage(e.message,"error"));updateSwitch();}
-function startEngine(){if(!state.tradingReady||!state.account){showMessage("Connect a Deriv account first. The engine needs authenticated proposal quotes.","error");return;}if(!state.selected.length){showMessage("Select at least one market.","error");return;}if(state.account.account_type==="real"&&$("autoBuy").checked&&!$("allowReal").checked){showMessage("Real-account auto-buy is blocked. Explicitly tick the REAL authorization checkbox.","error");return;}state.realConfirmed=state.account.account_type!=="real"||$("allowReal").checked;state.mgLevelLive=0;state.mgLevelPaper=0;state.running=true;$("engineStatus").textContent="SCANNING";$("startBtn").disabled=true;$("stopBtn").disabled=false;showMessage("ADEE started. Collecting ticks and requesting live quotes for paper validation.","success");}
-function stopEngine(msg="Engine stopped."){state.running=false;for(const [k,v] of state.pendingProposals){if(v.kind!=="BUY")state.pendingProposals.delete(k);}state.mgLevelLive=0;state.mgLevelPaper=0;$("engineStatus").textContent="STOPPED";$("startBtn").disabled=!state.tradingReady;$("stopBtn").disabled=true;showMessage(msg);render();}
-function resetPaper(){if(state.running){showMessage("Stop the engine before resetting validation.","error");return;}Object.values(state.mk).forEach(m=>{m.paper=[];m.paperPending=null;});state.paperProfit=0;state.mgLevelPaper=0;state.history=[];renderHistory();render();showMessage("Paper validation samples and session P/L reset.");}
-let renderQueued=false;
-function render(){const connected=state.tradingReady;$("balance").textContent=state.balance===null?"—":money(state.balance);$("currency").textContent=state.currency;$("accountType").textContent=state.account?state.account.account_type.toUpperCase():"Not connected";$("startBtn").disabled=!connected||state.running;$("stopBtn").disabled=!state.running;$("engineStatus").textContent=state.running?"SCANNING":"STOPPED";$("sessionPL").textContent=money(state.liveProfit);$("sessionPL").className=state.liveProfit>=0?"positive":"negative";$("paperPL").textContent=money(state.paperProfit);$("paperPL").className=state.paperProfit>=0?"positive":"negative";const samples=Object.values(state.mk).reduce((n,m)=>n+m.paper.length,0);$("paperSamples").textContent=samples;$("mgFields").style.opacity=mgOn()?"1":".5";if(mgOn()){const lL=state.mgLevelLive||0,lP=state.mgLevelPaper||0,sL=computeStake("LIVE"),sP=computeStake("PAPER");const capL=lL>0&&sL<round(stake()*Math.pow(mgMult(),lL))?" [budget cap]":"",capP=lP>0&&sP<round(stake()*Math.pow(mgMult(),lP))?" [budget cap]":"";$("mgInfo").textContent=`Martingale: ON · LIVE ${lL}/${mgMaxSteps()} next ${money(sL)}${capL} (budget ${money(mgBudget("LIVE"))}) · PAPER ${lP}/${mgMaxSteps()} next ${money(sP)}${capP} (budget ${money(mgBudget("PAPER"))})`;}else{$("mgInfo").textContent="Martingale: disabled.";}const auto=$("autoBuy").checked;$("modeBadge").textContent=auto?"AUTO BUY · VALIDATED ONLY":"PAPER VALIDATION";$("modeBadge").className="badge "+(auto?"good":"warn");const w=$("watch");w.innerHTML="";state.selected.forEach(sym=>{const m=mk(sym),model=modelFor(sym),ps=paperStats(m),row=document.createElement("div");row.className="market-row";const barrier=model?model.barrier:"—",lcb=model?(model.pWinLCB*100).toFixed(1)+"%":"—",gate=gatePass(m);row.innerHTML=`<span class="symbol">${NAME[sym]}<div class="sub">${sym}</div></span><span>${m.digits.length}</span><span>${m.lastDigit===null?"—":m.lastDigit}</span><span>${barrier}</span><span 
-class="hide-mobile">${lcb}</span><span class="hide-mobile"><span class="badge ${model?.stable?"good":"warn"}">${model?model.agreement+"/4":"—"}</span></span><span class="hide-mobile"><span class="badge ${gate?"good":"warn"}">${gate?"PASSED":ps.n+" / "+($("minPaper").value||250)}</span></span>`;w.appendChild(row);});if(state.account)updateSwitch();}
-function renderHistory(){const b=$("tradeHistory");b.innerHTML="";state.history.forEach(t=>{const tr=document.createElement("tr");[t.time,NAME[t.sym]||t.sym,t.mode,t.barrier,t.outcome,money(t.payout),money(t.pnl),t.gate].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});b.appendChild(tr);});}
-function buildMarkets(){const root=$("marketList");root.innerHTML="";MARKETS.forEach(([sym,label])=>{const l=document.createElement("label");l.className="chip";const c=document.createElement("input");c.type="checkbox";c.checked=state.selected.includes(sym);c.value=sym;c.addEventListener("change",()=>{state.selected=MARKETS.map(x=>x[0]).filter(s=>root.querySelector(`input[value="${s}"]`)?.checked);if(state.pub?.readyState===WebSocket.OPEN)subscribePublic();render();});const s=document.createElement("span");s.textContent=label;l.append(c,s);root.appendChild(l);});}
-$("connectBtn").addEventListener("click",connectAccount);$("startBtn").addEventListener("click",startEngine);$("stopBtn").addEventListener("click",()=>stopEngine());$("segDemo").addEventListener("click",()=>switchAccount("demo"));$("segReal").addEventListener("click",()=>switchAccount("real"));$("account").addEventListener("change",()=>switchAccount());$("autoBuy").addEventListener("change",render);$("mgEnabled").addEventListener("change",()=>{state.mgLevelLive=0;state.mgLevelPaper=0;render();});["mgMult","mgSteps","stake"].forEach(id=>$(id).addEventListener("change",()=>{state.mgLevelLive=0;state.mgLevelPaper=0;render();}));$("allowReal").addEventListener("change",()=>{state.realConfirmed=$("allowReal").checked;render();});$("minPaper").addEventListener("change",render);$("stake").addEventListener("change",()=>{if(Number($("stake").value)<.35)$("stake").value="0.35"});$("resetPaperBtn").addEventListener("click",resetPaper);$("clearHistoryBtn").addEventListener("click",()=>{state.history=[];renderHistory();});
-setInterval(()=>{if(state.running&&state.lastAnyTick&&now()-state.lastAnyTick>10000)showMessage("No recent ticks received. Waiting for the market feed to recover.","error");},2500);
-setInterval(()=>{const t=now();for(const [k,v] of state.pendingProposals){if(t-(v.created||t)>10000)state.pendingProposals.delete(k);}for(const [k,v] of state.histReq){if(t-(v.at||t)>15000)state.histReq.delete(k);}},1000);
-buildMarkets();render();renderHistory();connectPublic();showMessage("Market feed starting. Connect your Deriv account to obtain actual proposals for paper validation.");
+function handleBuy(d) {
+  const req = d.req_id ?? d.echo_req?.req_id, p = state.pendingProposals.get(req);
+  if (!p || p.kind !== "BUY") {
+    return;
+  }
+  state.pendingProposals.delete(req);
+  if (d.error) {
+    showError("Buy rejected: " + (d.error.message || "unknown error"));
+    return;
+  }
+  const b = d.buy;
+  if (!b?.contract_id) {
+    return;
+  }
+  const trade = {
+    contractId: b.contract_id,
+    sym: p.sym,
+    barrier: p.entry.barrier,
+    stake: p.ask,
+    payout: p.entry.payout,
+    entrySeq: p.seq,
+    opened: now(),
+    settled: false
+  };
+  state.byContract.set(b.contract_id, trade);
+  send(state.tradeSocket, { proposal_open_contract: 1, contract_id: b.contract_id, subscribe: 1 });
+  showMessage(`LIVE contract purchased: ${NAME[p.sym]}, DIGITDIFF barrier ${trade.barrier}, 1 tick, stake ${money(trade.stake)}.`, "success");
+}
+function settleContract(poc) {
+  const t = state.byContract.get(poc.contract_id);
+  if (!t || t.settled) {
+    return;
+  }
+  if (!(poc.is_sold === 1 || poc.status === "won" || poc.status === "lost")) {
+    return;
+  }
+  t.settled = true;
+  const pnl = Number.isFinite(Number(poc.profit)) ? Number(poc.profit) : Number(poc.sell_price || 0) - Number(poc.buy_price || t.stake);
+  state.liveProfit = round(state.liveProfit + pnl);
+  mgUpdate(pnl, "LIVE");
+  state.byContract.delete(t.contractId);
+  addLog({
+    time: new Date().toLocaleTimeString(),
+    sym: t.sym,
+    mode: "LIVE",
+    barrier: t.barrier,
+    outcome: pnl > 0 ? "WIN" : "LOSS",
+    payout: t.payout,
+    pnl,
+    gate: gatePass(mk(t.sym)) ? "PASSED" : "—"
+  });
+  if (poc.balance_after !== undefined) {
+    state.balance = Number(poc.balance_after);
+  }
+  checkRisk();
+}
+function addLog(x) {
+  state.history.unshift(x);
+  if (state.history.length > 300) {
+    state.history.pop();
+  }
+  renderHistory();
+  render();
+}
+function checkRisk() {
+  const pl = state.liveProfit;
+  const sl = Math.max(.35, Number($("stopLoss").value) || 3);
+  const tp = Math.max(.35, Number($("takeProfit").value) || 2);
+  if (pl <= -sl) {
+    stopEngine("Risk guardian: session stop-loss reached.");
+  } else if (pl >= tp) {
+    stopEngine("Session take-profit reached. Engine stopped.");
+  }
+}
+
+/* ---------- Deriv message routing ---------- */
+function handleMessage(d) {
+  if (d.msg_type === "active_symbols" && Array.isArray(d.active_symbols)) {
+    updateCatalogue(d.active_symbols);
+    return;
+  }
+  if (d.error) {
+    const req = d.req_id ?? d.echo_req?.req_id;
+    if (state.pendingProposals.has(req)) {
+      const p = state.pendingProposals.get(req);
+      state.pendingProposals.delete(req);
+      showError((p.kind === "BUY" ? "Buy" : "Proposal") + " error: " + d.error.message);
+    } else if (state.histReq.has(req)) {
+      state.histReq.delete(req);
+      showError("History request failed: " + d.error.message);
+    } else {
+      showError(d.error.message || "Deriv API error");
+    }
+    return;
+  }
+  if (d.msg_type === "tick" && d.tick) {
+    addTick(d.tick.symbol, d.tick);
+    return;
+  }
+  if (d.msg_type === "history") {
+    const h = state.histReq.get(d.req_id);
+    if (h) {
+      state.histReq.delete(d.req_id);
+      ingestHistory(h.sym, d);
+    } else if (d.echo_req && d.echo_req.ticks_history && state.selected.includes(d.echo_req.ticks_history) && !mk(d.echo_req.ticks_history).histReady) {
+      // Late reply to a request that was already swept: still use it.
+      ingestHistory(d.echo_req.ticks_history, d);
+    }
+    return;
+  }
+  if (d.msg_type === "proposal" && d.proposal) {
+    handleProposal(d);
+    return;
+  }
+  if (d.msg_type === "buy" && d.buy) {
+    handleBuy(d);
+    return;
+  }
+  if (d.msg_type === "proposal_open_contract" && d.proposal_open_contract) {
+    const poc = d.proposal_open_contract;
+    settleContract(poc);
+    const done = poc.is_sold === 1 || poc.status === "won" || poc.status === "lost";
+    if (done && d.subscription?.id) {
+      send(state.tradeSocket, { forget: d.subscription.id });
+    }
+    return;
+  }
+  if (d.msg_type === "balance" && d.balance) {
+    state.balance = Number(d.balance.balance);
+    state.currency = d.balance.currency || state.currency;
+    render();
+  }
+}
+function updateCatalogue(items) {
+  const found = items.filter(x => x && x.symbol && (/^(R_\d+|1HZ\d+V)$/.test(x.symbol) || /volatility/i.test(x.display_name || ""))).map(x => [x.symbol, x.display_name || x.symbol]);
+  if (!found.length) {
+    return;
+  }
+  const old = MARKETS.map(x => x[0]), wasAll = state.selected.length === old.length;
+  const merged = new Map(MARKETS.map(x => [x[0], x]));
+  found.forEach(x => merged.set(x[0], x));
+  MARKETS = [...merged.values()];
+  NAME = Object.fromEntries(MARKETS);
+  state.selected = wasAll ? MARKETS.map(x => x[0]) : MARKETS.map(x => x[0]).filter(s => state.selected.includes(s));
+  buildMarkets();
+  subscribePublic();
+  render();
+  showMessage(`Discovered ${MARKETS.length} volatility index markets from Deriv.`, "success");
+}
+
+/* ---------- connections (public feed + trading session) ---------- */
+function subscribePublic() {
+  if (!state.pub || state.pub.readyState !== WebSocket.OPEN) {
+    return;
+  }
+  send(state.pub, { forget_all: "ticks" });
+  state.selected.forEach((sym, i) => send(state.pub, { ticks: sym, subscribe: 1, req_id: 4000 + i }));
+  state.selected.forEach((sym) => {
+    const m = mk(sym);
+    if (m.histReady) {
+      return;
+    }
+    const id = ++state.reqSeq;
+    state.histReq.set(id, { sym, at: now() });
+    send(state.pub, { ticks_history: sym, end: "latest", count: 5000, style: "ticks", req_id: id });
+  });
+}
+function connectPublic() {
+  clearTimeout(state.publicTimer);
+  const ws = new WebSocket(WS_PUBLIC);
+  state.pub = ws;
+  ws.addEventListener("open", () => {
+    if (state.pub !== ws) {
+      return;
+    }
+    state.publicRetry = 0;
+    setStatus(true);
+    send(ws, { active_symbols: "brief", req_id: 300 });
+    subscribePublic();
+  });
+  ws.addEventListener("message", ev => {
+    if (state.pub !== ws) {
+      return;
+    }
+    let d;
+    try {
+      d = JSON.parse(ev.data);
+    } catch {
+      return;
+    }
+    handleMessage(d);
+  });
+  ws.addEventListener("close", () => {
+    if (state.pub !== ws) {
+      return;
+    }
+    state.pub = null;
+    setStatus(false);
+    state.publicRetry++;
+    state.publicTimer = setTimeout(connectPublic, Math.min(10000, 1000 * state.publicRetry));
+  });
+  ws.addEventListener("error", () => showError("Public market feed connection error."));
+}
+const authHeaders = () => ({ Authorization: "Bearer " + state.token, "Deriv-App-ID": state.appId });
+async function restFetch(path, opts = {}) {
+  const res = await fetch(REST_BASE + path, { ...opts, headers: { ...authHeaders(), ...(opts.headers || {}) } });
+  let body;
+  try {
+    body = await res.json();
+  } catch {
+    throw new Error("Deriv returned an unreadable response.");
+  }
+  if (!res.ok || body?.errors?.length || body?.error) {
+    throw new Error(body?.errors?.[0]?.message || body?.error?.message || body?.message || `HTTP ${res.status}`);
+  }
+  return body;
+}
+function selectedAccount() {
+  return state.accounts.find(a => a.account_id === $("account").value) || null;
+}
+function updateSwitch() {
+  const cur = selectedAccount();
+  [["segDemo", "demo"], ["segReal", "real"]].forEach(([id, type]) => {
+    const b = $(id);
+    b.disabled = !state.accounts.some(a => a.account_type === type);
+    b.classList.toggle("on", !!cur && cur.account_type === type);
+  });
+  $("switchHint").textContent = cur ? `Selected ${cur.account_type.toUpperCase()} account ${cur.account_id}.` : "Connect an account to enable trading.";
+  $("accountType").textContent = cur ? cur.account_type.toUpperCase() : "Not connected";
+}
+function populateAccounts(keep) {
+  const sel = $("account");
+  sel.innerHTML = "";
+  state.accounts.forEach(a => {
+    const o = document.createElement("option");
+    o.value = a.account_id;
+    o.textContent = `${a.account_type.toUpperCase()} · ${a.account_id} · ${a.currency}`;
+    sel.appendChild(o);
+  });
+  const found = state.accounts.find(a => a.account_id === keep) || state.accounts.find(a => a.account_type === "demo") || state.accounts[0];
+  if (found) {
+    sel.value = found.account_id;
+  }
+  updateSwitch();
+}
+async function connectAccount() {
+  const token = $("apiToken").value.trim(), appId = $("appId").value.trim();
+  if (!token || !appId) {
+    showMessage("Enter both your API token and App ID.", "error");
+    return;
+  }
+  if (state.running) {
+    showMessage("Stop the engine before changing account.", "error");
+    return;
+  }
+  state.token = token;
+  state.appId = appId;
+  $("connectBtn").disabled = true;
+  showMessage("Loading Deriv accounts…");
+  try {
+    const b = await restFetch("/trading/v1/options/accounts");
+    const list = (b.data || []).filter(a => a.status !== "inactive");
+    if (!list.length) {
+      throw new Error("No active Options accounts were returned for this token.");
+    }
+    state.accounts = list;
+    list.forEach(a => state.creds[a.account_id] = { token, appId });
+    populateAccounts(state.account?.account_id);
+    await connectTrading();
+  } catch (e) {
+    showMessage(e.message || "Account connection failed.", "error");
+  } finally {
+    $("connectBtn").disabled = false;
+  }
+}
+async function connectTrading() {
+  if (state.connecting) {
+    return;
+  }
+  state.connecting = true;
+  clearTimeout(state.reconnectTimer);
+  try {
+    const old = state.tradeSocket;
+    state.tradeSocket = null;
+    state.tradingReady = false;
+    if (old) {
+      try {
+        old.close();
+      } catch { }
+    }
+    const a = selectedAccount();
+    if (!a) {
+      throw new Error("Select an account first.");
+    }
+    state.account = a;
+    state.currency = a.currency || "USD";
+    state.balance = Number(a.balance);
+    const b = await restFetch(`/trading/v1/options/accounts/${encodeURIComponent(a.account_id)}/otp`, { method: "POST" });
+    const url = b?.data?.url;
+    if (!url) {
+      throw new Error("Deriv did not return a WebSocket OTP URL.");
+    }
+    const ws = new WebSocket(url);
+    state.tradeSocket = ws;
+    ws.addEventListener("open", () => {
+      if (state.tradeSocket !== ws) {
+        return;
+      }
+      state.tradingReady = true;
+      state.reconnectCount = 0;
+      send(ws, { balance: 1, subscribe: 1, req_id: 3001 });
+      state.byContract.forEach(t => send(ws, { proposal_open_contract: 1, contract_id: t.contractId, subscribe: 1 }));
+      render();
+      showMessage(`Connected to ${a.account_type.toUpperCase()} account. Paper quote validation is ready.`, "success");
+    });
+    ws.addEventListener("message", ev => {
+      if (state.tradeSocket !== ws) {
+        return;
+      }
+      let d;
+      try {
+        d = JSON.parse(ev.data);
+      } catch {
+        return;
+      }
+      handleMessage(d);
+    });
+    ws.addEventListener("close", () => {
+      if (state.tradeSocket !== ws) {
+        return;
+      }
+      state.tradeSocket = null;
+      state.tradingReady = false;
+      render();
+      if (state.token) {
+        state.reconnectTimer = setTimeout(() => connectTrading().catch(e => showMessage("Reconnect failed: " + e.message, "error")), 2500);
+      }
+    });
+    ws.addEventListener("error", () => showError("Authenticated trading session error."));
+  } finally {
+    state.connecting = false;
+  }
+}
+function switchAccount(type) {
+  if (state.running) {
+    showMessage("Stop the engine before switching accounts.", "error");
+    return;
+  }
+  if (type) {
+    const a = state.accounts.find(x => x.account_type === type);
+    if (a) {
+      $("account").value = a.account_id;
+    }
+  }
+  const a = selectedAccount();
+  if (!a) {
+    return;
+  }
+  state.mgLevelLive = 0;
+  state.mgLevelPaper = 0;
+  connectTrading().catch(e => showMessage(e.message, "error"));
+  updateSwitch();
+}
+
+/* ---------- engine control ---------- */
+function startEngine() {
+  if (!state.tradingReady || !state.account) {
+    showMessage("Connect a Deriv account first. The engine needs authenticated proposal quotes.", "error");
+    return;
+  }
+  if (!state.selected.length) {
+    showMessage("Select at least one market.", "error");
+    return;
+  }
+  if (state.account.account_type === "real" && $("autoBuy").checked && !$("allowReal").checked) {
+    showMessage("Real-account auto-buy is blocked. Explicitly tick the REAL authorization checkbox.", "error");
+    return;
+  }
+  state.realConfirmed = state.account.account_type !== "real" || $("allowReal").checked;
+  state.mgLevelLive = 0;
+  state.mgLevelPaper = 0;
+  state.running = true;
+  $("engineStatus").textContent = "SCANNING";
+  $("startBtn").disabled = true;
+  $("stopBtn").disabled = false;
+  showMessage("ADEE started. Collecting ticks and requesting live quotes for paper validation.", "success");
+}
+function stopEngine(msg = "Engine stopped.") {
+  state.running = false;
+  for (const [k, v] of state.pendingProposals) {
+    if (v.kind !== "BUY") {
+      state.pendingProposals.delete(k);
+    }
+  }
+  state.mgLevelLive = 0;
+  state.mgLevelPaper = 0;
+  $("engineStatus").textContent = "STOPPED";
+  $("startBtn").disabled = !state.tradingReady;
+  $("stopBtn").disabled = true;
+  showMessage(msg);
+  render();
+}
+function resetPaper() {
+  if (state.running) {
+    showMessage("Stop the engine before resetting validation.", "error");
+    return;
+  }
+  Object.values(state.mk).forEach(m => {
+    m.paper = [];
+    m.paperPending = null;
+  });
+  state.paperProfit = 0;
+  state.mgLevelPaper = 0;
+  state.history = [];
+  renderHistory();
+  render();
+  showMessage("Paper validation samples and session P/L reset.");
+}
+
+/* ---------- screen ---------- */
+let renderQueued = false;
+function scheduleRender() {
+  if (renderQueued) {
+    return;
+  }
+  renderQueued = true;
+  requestAnimationFrame(() => {
+    renderQueued = false;
+    render();
+  });
+}
+function render() {
+  const connected = state.tradingReady;
+  $("balance").textContent = state.balance === null ? "—" : money(state.balance);
+  $("currency").textContent = state.currency;
+  $("accountType").textContent = state.account ? state.account.account_type.toUpperCase() : "Not connected";
+  $("startBtn").disabled = !connected || state.running;
+  $("stopBtn").disabled = !state.running;
+  $("engineStatus").textContent = state.running ? "SCANNING" : "STOPPED";
+  $("sessionPL").textContent = money(state.liveProfit);
+  $("sessionPL").className = state.liveProfit >= 0 ? "positive" : "negative";
+  $("paperPL").textContent = money(state.paperProfit);
+  $("paperPL").className = state.paperProfit >= 0 ? "positive" : "negative";
+  const samples = Object.values(state.mk).reduce((n, m) => n + m.paper.length, 0);
+  $("paperSamples").textContent = samples;
+  $("mgFields").style.opacity = mgOn() ? "1" : ".5";
+  if (mgOn()) {
+    const lL = state.mgLevelLive || 0;
+    const lP = state.mgLevelPaper || 0;
+    const sL = computeStake("LIVE");
+    const sP = computeStake("PAPER");
+    const capL = lL > 0 && sL < round(stake() * Math.pow(mgMult(), lL)) ? " [budget cap]" : "";
+    const capP = lP > 0 && sP < round(stake() * Math.pow(mgMult(), lP)) ? " [budget cap]" : "";
+    $("mgInfo").textContent = `Martingale: ON · LIVE ${lL}/${mgMaxSteps()} next ${money(sL)}${capL} (budget ${money(mgBudget("LIVE"))}) · PAPER ${lP}/${mgMaxSteps()} next ${money(sP)}${capP} (budget ${money(mgBudget("PAPER"))})`;
+  } else {
+    $("mgInfo").textContent = "Martingale: disabled.";
+  }
+  const auto = $("autoBuy").checked;
+  $("modeBadge").textContent = auto ? "AUTO BUY · VALIDATED ONLY" : "PAPER VALIDATION";
+  $("modeBadge").className = "badge " + (auto ? "good" : "warn");
+  const w = $("watch");
+  w.innerHTML = "";
+  state.selected.forEach(sym => {
+    const m = mk(sym);
+    const model = modelFor(sym);
+    const ps = paperStats(m);
+    const row = document.createElement("div");
+    row.className = "market-row";
+    const barrier = model ? model.barrier : "—";
+    const lcb = model ? (model.pWinLCB * 100).toFixed(1) + "%" : "—";
+    const gate = gatePass(m);
+    row.innerHTML = `<span class="symbol">${NAME[sym]}<div class="sub">${sym}</div></span><span>${m.digits.length}</span><span>${m.lastDigit === null ? "—" : m.lastDigit}</span><span>${barrier}</span><span class="hide-mobile">${lcb}</span><span class="hide-mobile"><span class="badge ${model?.stable ? "good" : "warn"}">${model ? model.agreement + "/4" : "—"}</span></span><span class="hide-mobile"><span class="badge ${gate ? "good" : "warn"}">${gate ? "PASSED" : ps.n + " / " + ($("minPaper").value || 250)}</span></span>`;
+    w.appendChild(row);
+  });
+  if (state.account) {
+    updateSwitch();
+  }
+}
+function renderHistory() {
+  const b = $("tradeHistory");
+  b.innerHTML = "";
+  state.history.forEach(t => {
+    const tr = document.createElement("tr");
+    [t.time, NAME[t.sym] || t.sym, t.mode, t.barrier, t.outcome, money(t.payout), money(t.pnl), t.gate].forEach(v => {
+      const td = document.createElement("td");
+      td.textContent = v;
+      tr.appendChild(td);
+    });
+    b.appendChild(tr);
+  });
+}
+function buildMarkets() {
+  const root = $("marketList");
+  root.innerHTML = "";
+  MARKETS.forEach(([sym, label]) => {
+    const l = document.createElement("label");
+    l.className = "chip";
+    const c = document.createElement("input");
+    c.type = "checkbox";
+    c.checked = state.selected.includes(sym);
+    c.value = sym;
+    c.addEventListener("change", () => {
+      state.selected = MARKETS.map(x => x[0]).filter(s => root.querySelector(`input[value="${s}"]`)?.checked);
+      if (state.pub?.readyState === WebSocket.OPEN) {
+        subscribePublic();
+      }
+      render();
+    });
+    const s = document.createElement("span");
+    s.textContent = label;
+    l.append(c, s);
+    root.appendChild(l);
+  });
+}
+
+/* ---------- events ---------- */
+$("connectBtn").addEventListener("click", connectAccount);
+$("startBtn").addEventListener("click", startEngine);
+$("stopBtn").addEventListener("click", () => stopEngine());
+$("segDemo").addEventListener("click", () => switchAccount("demo"));
+$("segReal").addEventListener("click", () => switchAccount("real"));
+$("account").addEventListener("change", () => switchAccount());
+$("autoBuy").addEventListener("change", render);
+$("mgEnabled").addEventListener("change", () => {
+  state.mgLevelLive = 0;
+  state.mgLevelPaper = 0;
+  render();
+});
+["mgMult", "mgSteps", "stake"].forEach(id => $(id).addEventListener("change", () => {
+  state.mgLevelLive = 0;
+  state.mgLevelPaper = 0;
+  render();
+}));
+$("allowReal").addEventListener("change", () => {
+  state.realConfirmed = $("allowReal").checked;
+  render();
+});
+$("minPaper").addEventListener("change", render);
+$("stake").addEventListener("change", () => {
+  if (Number($("stake").value) < .35) {
+    $("stake").value = "0.35";
+  }
+});
+$("resetPaperBtn").addEventListener("click", resetPaper);
+$("clearHistoryBtn").addEventListener("click", () => {
+  state.history = [];
+  renderHistory();
+});
+
+/* ---------- watchdogs & start-up ---------- */
+setInterval(() => {
+  if (state.running && state.lastAnyTick && now() - state.lastAnyTick > 10000) {
+    showMessage("No recent ticks received. Waiting for the market feed to recover.", "error");
+  }
+}, 2500);
+setInterval(() => {
+  const t = now();
+  for (const [k, v] of state.pendingProposals) {
+    if (t - (v.created || t) > 10000) {
+      state.pendingProposals.delete(k);
+    }
+  }
+  for (const [k, v] of [...state.histReq]) {
+    if (t - (v.at || t) > 60000) {
+      state.histReq.delete(k);
+      // Retry a history request that never came back, so the scanner can fill.
+      if (state.selected.includes(v.sym) && !mk(v.sym).histReady && state.pub && state.pub.readyState === WebSocket.OPEN) {
+        const id = ++state.reqSeq;
+        state.histReq.set(id, { sym: v.sym, at: t });
+        send(state.pub, { ticks_history: v.sym, end: "latest", count: 5000, style: "ticks", req_id: id });
+      }
+    }
+  }
+}, 1000);
+buildMarkets();
+render();
+renderHistory();
+connectPublic();
+showMessage("Market feed starting. Connect your Deriv account to obtain actual proposals for paper validation.");
 </script>
 <script>
 if ("serviceWorker" in navigator) {
@@ -833,4 +2188,5 @@ if ("serviceWorker" in navigator) {
   }
 })();
 </script>
-</body></html>
+</body>
+</html>
